@@ -2,6 +2,7 @@
 
 export(convertSEtoQTLtools)
 export(importQTLtoolsTable)
+export(mbvFindBestMatch)
 export(normaliseSE_quantile)
 export(qtltoolsTabixFetchPhenotypes)
 export(quantileNormaliseVector)

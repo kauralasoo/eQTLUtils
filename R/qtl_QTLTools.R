@@ -75,6 +75,12 @@ qtltoolsTabixFetchPhenotypes <- function(phenotype_ranges, tabix_file){
 }
 
 
+#' Post-process QTLTools mbv results to find the best matching individual for each sample
+#'
+#' @param mbv_df Data frame with MBV results for one sequencing sample.
+#'
+#' @return Data frame with one row identifying the best matching invidivual for this sample
+#' @export
 mbvFindBestMatch <- function(mbv_df){
   res = dplyr::transmute(mbv_df, mbv_genotype_id = SampleID,
                          het_consistent_frac = n_het_consistent/n_het_covered,
