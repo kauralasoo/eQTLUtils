@@ -72,10 +72,12 @@ calculateSexQCDataFrame <- function(study_data){
 #'
 #' @param study_data_se SummarizedExperiment file to be analysed
 #' @param condition Boolean value if html output should be created (Default:FALSE)
+#' @param html_output Boolean value if html output should be created (Default:FALSE)
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
 #' @return MDS plot of study 
 #' @author Nurlan Kerimov
 #' @export
-plotMDSAnalysis <- function(study_data_se, condition = "all"){
+plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
   mds_matrix = calculateMDSMatrix(study_data_se, condition)
 
   mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = genotype_id)) + 
@@ -83,8 +85,17 @@ plotMDSAnalysis <- function(study_data_se, condition = "all"){
     ggplot2::xlab("MDS Coordinate 1") + 
     ggplot2::ylab("MDS Coordinate 2") #+ geom_text(aes(label=genotype_id))
   
-  return(mds_plot)
+  MDS_ggplotly_plot <- plotly::ggplotly()
+  study_name <- study_data_se$study %>% unique()
+  
+  if (html_output) {
+    if (!dir.exists(output_dir)) { dir.create(output_dir) }
+    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
+  }
+  
+  return(MDS_ggplotly_plot)
 }
+
 
 #' Generate MDS Matrix for SummarizedExperiment
 #'
@@ -114,4 +125,51 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
     dplyr::left_join(SummarizedExperiment::as.data.frame(SummarizedExperiment::colData(processed_se)), by = "sample_id")
   
   return(mds_matrix)
+}
+
+#' Generate PCA QC Plot for different cell types
+#'
+#' @param study_data_se SummarizedExperiment file to be analysed
+#' @param condition Boolean value if html output should be created (Default:FALSE)
+#' @param html_output Boolean value if html output should be created (Default:FALSE)
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return PCA plot of study 
+#' @author Nurlan Kerimov
+#' @export
+plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
+  pca_matrix = calculatePCAMatrix(study_data_se, condition)
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = genotype_id)) + ggplot2::geom_point() + ggplot2::scale_shape_manual(values=seq(0,6)) #+ geom_text(aes(label=genotype_id))
+  
+  PCA_ggplotly_plot <- plotly::ggplotly()
+  study_name <- study_data_se$study %>% unique()
+  
+  if (html_output) {
+    if (!dir.exists(output_dir)) { dir.create(output_dir) }
+    htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
+  }
+  
+  return(PCA_ggplotly_plot)
+}
+
+
+#' Generate PCA Matrix for SummarizedExperiment
+#'
+#' @param study_data_se SummarizedExperiment file to be analysed
+#' @param condition if needed PCA matrix of specific condition
+#' @return PCA Matrix of study 
+#' @author Nurlan Kerimov
+#' @export
+calculatePCAMatrix <- function(study_data_se, condition = "all"){
+  if (condition!="all") {
+    assertthat::assert_that()
+    study_data_se = study_data_se[,study_data_se$condition == condition]
+  }
+  
+  # choose only protein coding genes and TPM normalise
+  processed_se = eQTLUtils::filterSE_gene_types(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
+  processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1,]
+  
+  #Perform PCA
+  pca_res = eQTLUtils::transformSE_PCA(processed_se, assay_name = "tpms", n_pcs = 10, log_transform = TRUE, center = TRUE, scale. = TRUE)
+  return(pca_res$pca_matrix)
 }
