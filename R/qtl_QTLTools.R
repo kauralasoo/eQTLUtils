@@ -146,3 +146,19 @@ convertSEtoQTLtools <- function(se, assay_name = "cqn"){
 
   return(res)
 }
+
+
+importQTLtoolsPCA <- function(pca_path){
+  naive_pca = readr::read_delim(pca_path, delim = " ") %>%
+    dplyr::select(-SampleID)
+  sample_ids = colnames(naive_pca)
+  pca_df = t(naive_pca) %>%
+    as.data.frame() %>%
+    dplyr::as_tibble()
+  colnames(pca_df) = paste0("PC", 1:ncol(pca_df))
+  pca_df$sample_id = sample_ids
+  pca_df = dplyr::select(pca_df, sample_id, everything())
+  return(pca_df)
+}
+
+
