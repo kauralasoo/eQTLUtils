@@ -1,4 +1,4 @@
-#' Save a list of matrices into a suitable format for FastQTL
+#' Save a list of matrices into a suitable format for QTLTools
 #'
 #' Works with expression and covariates matrices.
 #'
@@ -9,7 +9,11 @@
 #' @author Kaur Alasoo
 #' @export
 saveQTLToolsMatrices <- function(data_list, output_dir, file_suffix = "bed", col_names = TRUE){
-  #Save data for FastQTL to disk
+
+  #Check if the output dir exists and if not then create one
+  if(!file.exists(output_dir)){
+    dir.create(output_dir, recursive = TRUE)
+  }
 
   #Save each matrix as a separate  txt file
   for (sn in names(data_list)){
