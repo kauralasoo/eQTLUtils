@@ -1,11 +1,16 @@
 makeFeatureCountsSummarizedExperiemnt <- function(featureCounts, transcript_metadata, sample_metadata){
 
+  #Specify required gene metadata columns
+  required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id","chromosome","gene_start",
+                                 "gene_end","strand","gene_name","gene_type","gene_gc_content","gene_version","phenotype_pos")
+
   #Extract gene metadata
   gene_data = dplyr::select(transcript_metadata, gene_id, chromosome, gene_start, gene_end, strand,
                             gene_name, gene_type, gene_gc_content, gene_version) %>%
     dplyr::distinct() %>%
-    dplyr::mutate(phenotype_id = gene_id, group_id = gene_id) %>%
+    dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
     dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
+    dplyr::select(required_gene_meta_columns, everything()) %>% #Reorder columns
     as.data.frame()
   rownames(gene_data) = gene_data$gene_id
 
@@ -280,3 +285,10 @@ normaliseSE_quantile <- function(se, assay_name = "usage"){
   return(se)
 }
 
+extractPhenotypeData <- function(se){
+  meta = SummarizedExperiment::rowData(se) %>%
+    as.data.frame() %>%
+    dplyr::as_tibble() %>%
+    dplyr::select(phenotype_id, group_id, gene_id, chromosome, phenotype_pos) #Extract essential columns
+  return(meta)
+}

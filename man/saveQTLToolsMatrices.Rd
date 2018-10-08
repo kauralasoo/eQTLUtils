@@ -2,7 +2,7 @@
 % Please edit documentation in R/qtl_QTLTools.R
 \name{saveQTLToolsMatrices}
 \alias{saveQTLToolsMatrices}
-\title{Save a list of matrices into a suitable format for FastQTL}
+\title{Save a list of matrices into a suitable format for QTLTools}
 \usage{
 saveQTLToolsMatrices(data_list, output_dir, file_suffix = "bed",
   col_names = TRUE)
