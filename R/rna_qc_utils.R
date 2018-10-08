@@ -9,9 +9,14 @@
 plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
   joined <- calculateSexQCDataFrame(study_data)
   
+  if (all(is.na(joined$sex))) { joined$sex <- "NA"}
+  
   study_name <- study_data$study %>% unique()
   # generate the plot
-  Sex_QC_plot <- ggplot2::ggplot(joined, ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + ggplot2::geom_point(ggplot2::aes(col=sex)) + ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) 
+  Sex_QC_plot <- ggplot2::ggplot(joined, 
+    ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) 
+    + ggplot2::geom_point(ggplot2::aes(col=sex)) 
+    + ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) 
   MDS_ggplotly_plot <- plotly::ggplotly()
 
   if (html_output) {
@@ -79,15 +84,14 @@ calculateSexQCDataFrame <- function(study_data){
 #' @export
 plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
   mds_matrix = calculateMDSMatrix(study_data_se, condition)
-
-  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = genotype_id)) + 
-    ggplot2::geom_point() + ggplot2::scale_shape_manual(values=seq(0,6)) +
-    ggplot2::xlab("MDS Coordinate 1") + 
-    ggplot2::ylab("MDS Coordinate 2") #+ geom_text(aes(label=genotype_id))
-  
-  MDS_ggplotly_plot <- plotly::ggplotly()
   study_name <- study_data_se$study %>% unique()
   
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = genotype_id)) + 
+    ggplot2::geom_point() + ggplot2::scale_shape_manual(values=seq(0,6)) +
+    ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2", title = paste0(study_name, " MDS analysis | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData())))
+  
+  MDS_ggplotly_plot <- plotly::ggplotly()
+
   if (html_output) {
     if (!dir.exists(output_dir)) { dir.create(output_dir) }
     htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
@@ -138,10 +142,14 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
 #' @export
 plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
   pca_matrix = calculatePCAMatrix(study_data_se, condition)
-  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = genotype_id)) + ggplot2::geom_point() + ggplot2::scale_shape_manual(values=seq(0,6)) #+ geom_text(aes(label=genotype_id))
+  study_name <- study_data_se$study %>% unique()
+  
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = genotype_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=seq(0,6)) + 
+    ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA analysis | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData())))
   
   PCA_ggplotly_plot <- plotly::ggplotly()
-  study_name <- study_data_se$study %>% unique()
   
   if (html_output) {
     if (!dir.exists(output_dir)) { dir.create(output_dir) }
