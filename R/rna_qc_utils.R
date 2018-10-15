@@ -14,9 +14,8 @@ plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
   study_name <- study_data$study %>% unique()
   # generate the plot
   Sex_QC_plot <- ggplot2::ggplot(joined, 
-    ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) 
-    + ggplot2::geom_point(ggplot2::aes(col=sex)) 
-    + ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) 
+    ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + 
+    ggplot2::geom_point(ggplot2::aes(col=sex)) 
   MDS_ggplotly_plot <- plotly::ggplotly()
 
   if (html_output) {
@@ -86,9 +85,10 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
   mds_matrix = calculateMDSMatrix(study_data_se, condition)
   study_name <- study_data_se$study %>% unique()
   
-  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = genotype_id)) + 
-    ggplot2::geom_point() + ggplot2::scale_shape_manual(values=seq(0,6)) +
-    ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2", title = paste0(study_name, " MDS analysis | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData())))
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=seq(0,6)) +
+    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData()))) 
   
   MDS_ggplotly_plot <- plotly::ggplotly()
 
@@ -144,7 +144,7 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
   pca_matrix = calculatePCAMatrix(study_data_se, condition)
   study_name <- study_data_se$study %>% unique()
   
-  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = genotype_id)) + 
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) + 
     ggplot2::geom_point() + 
     ggplot2::scale_shape_manual(values=seq(0,6)) + 
     ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA analysis | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData())))
