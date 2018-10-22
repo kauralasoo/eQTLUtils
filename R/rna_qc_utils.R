@@ -15,7 +15,8 @@ plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
   # generate the plot
   Sex_QC_plot <- ggplot2::ggplot(joined, 
     ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + 
-    ggplot2::geom_point(ggplot2::aes(col=sex)) 
+    ggplot2::geom_point(ggplot2::aes(col=sex)) +
+    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) 
   MDS_ggplotly_plot <- plotly::ggplotly()
 
   if (html_output) {
