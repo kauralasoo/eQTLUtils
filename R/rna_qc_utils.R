@@ -21,7 +21,7 @@ plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
 
   if (html_output) {
     if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
+    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_sex_QC.html")))
   }
   
   return(MDS_ggplotly_plot)
@@ -95,7 +95,7 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
 
   if (html_output) {
     if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
+    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_MDS_plot.html")))
   }
   
   return(MDS_ggplotly_plot)
@@ -111,7 +111,6 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
 #' @export
 calculateMDSMatrix <- function(study_data_se, condition = "all"){
   if (condition!="all") {
-    assertthat::assert_that()
     study_data_se = study_data_se[,study_data_se$condition == condition]
   }
   
@@ -154,7 +153,7 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
   
   if (html_output) {
     if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, ".html")))
+    htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_PCA_plot.html")))
   }
   
   return(PCA_ggplotly_plot)
@@ -170,7 +169,6 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE,
 #' @export
 calculatePCAMatrix <- function(study_data_se, condition = "all"){
   if (condition!="all") {
-    assertthat::assert_that()
     study_data_se = study_data_se[,study_data_se$condition == condition]
   }
   
