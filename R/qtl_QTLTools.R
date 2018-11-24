@@ -140,7 +140,7 @@ convertSEtoQTLtools <- function(se, assay_name = "cqn"){
 
   #Make QTLtools phenotype table
   res = dplyr::mutate(as.data.frame(assay), phenotype_id = rownames(assay)) %>%
-    dplyr::select(phenotype_id, everything()) %>%
+    dplyr::select(phenotype_id, dplyr::everything()) %>%
     dplyr::left_join(pheno_data, ., by = "phenotype_id") %>%
     dplyr::arrange()
 
@@ -161,4 +161,22 @@ importQTLtoolsPCA <- function(pca_path){
   return(pca_df)
 }
 
+studySEtoQTLTools <- function(se, assay_name, out_dir){
 
+  #Make assertions
+  assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "qtl_group"))
+  assertthat::assert_that(assertthat::has_name(SummarizedExperiment::assays(se), assay_name))
+
+  #Split the SE into list based on qtl_group
+  qtl_groups = unique(se$qtl_group)
+  group_list = setNames(as.list(qtl_groups), qtl_groups)
+  group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "qtl_group", .))
+
+  #Convert SE onbjects to QTLtools
+  qtltools_list = purrr::map(group_se_list, ~convertSEtoQTLtools(., assay_name = assay_name))
+  saveQTLToolsMatrices(qtltools_list, output_dir = out_dir, file_suffix = "bed")
+
+  #Extract sample names
+  sample_names = purrr::map(qtltools_list, ~colnames(.)[-(1:6)])
+  saveQTLToolsMatrices(sample_names, output_dir = out_dir, file_suffix = "sample_names.txt", col_names = FALSE)
+}
