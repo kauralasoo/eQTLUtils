@@ -39,3 +39,21 @@ importBiomartMetadata <- function(biomart_path){
   colnames(transcript_meta) = col_df$column_id
   return(transcript_meta)
 }
+
+#' Import variant information extracted from VCF file into R
+#'
+#' The variant information text file can be generated from the VCF using the following
+#' bcftools command:
+#' bcftools query -f '\%CHROM\\t\%POS\\t\%ID\\t\%REF\\t\%ALT\\t\%TYPE\\t\%AC\\t\%AN\\n' path/to/vcf_file.vcf.gz | bgzip > path/to/variant_infromation_file.txt.gz
+#'
+#' @param path Path to the the variant information text file.
+#' @export
+importVariantInformation <- function(path){
+  info_col_names = c("chr","pos","snp_id","ref","alt","type","AC","AN", "MAF", "R2")
+  into_col_types = "cicccciidd"
+  snp_info = readr::read_delim(path, delim = "\t", col_types = into_col_types, col_names = info_col_names)
+  snp_info = dplyr::mutate(snp_info, indel_length = pmax(nchar(alt), nchar(ref))) %>%
+    dplyr::mutate(is_indel = ifelse(indel_length > 1, TRUE, FALSE)) %>%
+    dplyr::mutate(MAF = pmin(AC/AN, 1-(AC/AN)))
+  return(snp_info)
+}
