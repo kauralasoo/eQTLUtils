@@ -59,13 +59,33 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
 
   #Make assay list
   assay_list = list()
-  assay_list[[assay_name]] = assay
+  assay_list[[assay_name]] = as.matrix(assay)
 
   #Make a summarizedExperiment object
   se = SummarizedExperiment::SummarizedExperiment(
     assays = assay_list,
     colData = col_df,
     rowData = row_df)
+}
+
+
+filterSummarizedExperiment <- function(se, valid_chromosomes = NA, filter_rna_qc = FALSE, filter_genotype_qc = FALSE){
+
+  #Filter chromosomes
+  if(!is.na(valid_chromosomes)){
+    se = se[SummarizedExperiment::rowData(se)$chromosome %in% valid_chromosomes,]
+  }
+
+  #Filter RNA QC
+  if(filter_rna_qc){
+    se = se[,se$rna_qc_passed]
+  }
+
+  #Filter genotype QC
+  if(filter_genotype_qc){
+    se = se[,se$genotype_qc_passed]
+  }
+  return(se)
 }
 
 normaliseSE_cqn <- function(se, assay_name = "counts"){
@@ -203,7 +223,7 @@ mergeCountsSEs <- function(se1, se2){
 #' @return Subsetted SummmarizedExperiment object
 #' @export
 subsetSEByColumnValue <- function(se, column, value){
-  selection = colData(cqn_se)[,column] == value
+  selection = SummarizedExperiment::colData(se)[,column] == value
   result = se[,selection]
   return(result)
 }
@@ -291,4 +311,45 @@ extractPhenotypeData <- function(se){
     dplyr::as_tibble() %>%
     dplyr::select(phenotype_id, group_id, gene_id, chromosome, phenotype_pos) #Extract essential columns
   return(meta)
+}
+
+
+#' Remove phenotypes from SummarizedExperiments that do not have cis genotypes
+#'
+#' @param se SummarizedExperiment object
+#' @param variant_information Variant information data frame from importVariantInformation()
+#' @param variant_information Maximal distance from phenotype_pos
+#' @param variant_information Minimal number of variants in cis before the phenotype is removed.
+#'
+#' @return filtered SummarizedExperiment object where phenotypes with no cis variants are removed.
+#' @export
+checkCisVariants <- function(se, variant_information, cis_distance = 1000000, min_cis_variant = 5){
+
+  #Extract gene metadata from SummarizedExperiment
+  gene_data = SummarizedExperiment::rowData(se) %>% as.data.frame() %>% as_tibble()
+
+  #Check that all required columns are there
+  assertthat::assert_that(assertthat::has_name(gene_data, "chromosome"))
+  assertthat::assert_that(assertthat::has_name(gene_data, "phenotype_pos"))
+  assertthat::assert_that(assertthat::has_name(gene_data, "strand"))
+
+  assertthat::assert_that(assertthat::has_name(variant_information, "chr"))
+  assertthat::assert_that(assertthat::has_name(variant_information, "pos"))
+
+  #Make GRanges objects
+  gene_ranges = GenomicRanges::GRanges(seqnames = gene_data$chromosome,
+                                       ranges = IRanges::IRanges(start = gene_data$phenotype_pos - cis_distance, end = gene_data$phenotype_pos + cis_distance),
+                                       strand = gene_data$strand)
+  var_ranges = GenomicRanges::GRanges(seqnames = var_info$chr,
+                                      ranges = IRanges::IRanges(start = var_info$pos, end = var_info$pos),
+                                      strand = "+")
+  olap_count = GenomicRanges::countOverlaps(gene_ranges, var_ranges, ignore.strand = TRUE)
+  count_df = dplyr::select(gene_data, phenotype_id, chromosome, phenotype_pos) %>%
+    dplyr::mutate(snp_count = olap_count) %>%
+    dplyr::arrange(snp_count) %>%
+    dplyr::filter(snp_count >= min_cis_variant)
+
+  #Keep phenotypes that contain enough variants nearby
+  se = se[count_df$phenotype_id,]
+  return(se)
 }
