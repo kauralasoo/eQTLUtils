@@ -353,3 +353,16 @@ checkCisVariants <- function(se, variant_information, cis_distance = 1000000, mi
   se = se[count_df$phenotype_id,]
   return(se)
 }
+
+extractPhentypeFromSE <- function(phenotype_id, se, assay){
+
+  #extract single phenotype
+  pheno_mat = assays(se)[[assay]]
+  pheno_row = pheno_mat[phenotype_id,]
+  pheno_df = dplyr::data_frame(phenotype_id = phenotype_id, sample_id = names(pheno_row), phenotype_value = pheno_row)
+
+  #Extract sample metadata
+  sample_meta = SummarizedExperiment::colData(se) %>% as.data.frame() %>% dplyr::as_tibble()
+  pheno_df = dplyr::left_join(pheno_df, sample_meta, by = "sample_id")
+  return(pheno_df)
+}
