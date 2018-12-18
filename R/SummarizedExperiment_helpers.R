@@ -339,7 +339,7 @@ checkCisVariants <- function(se, variant_information, cis_distance = 1000000, mi
   #Make GRanges objects
   gene_ranges = GenomicRanges::GRanges(seqnames = gene_data$chromosome,
                                        ranges = IRanges::IRanges(start = gene_data$phenotype_pos - cis_distance, end = gene_data$phenotype_pos + cis_distance),
-                                       strand = gene_data$strand)
+                                       strand = "*")
   var_ranges = GenomicRanges::GRanges(seqnames = var_info$chr,
                                       ranges = IRanges::IRanges(start = var_info$pos, end = var_info$pos),
                                       strand = "+")
