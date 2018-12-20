@@ -330,6 +330,14 @@ checkCisVariants <- function(se,
 
   #Extract gene metadata from SummarizedExperiment
   gene_data = SummarizedExperiment::rowData(se) %>% as.data.frame() %>% as_tibble()
+  
+  #Check that all required columns are there
+  assertthat::assert_that(assertthat::has_name(gene_data, "chromosome"))
+  assertthat::assert_that(assertthat::has_name(gene_data, "phenotype_pos"))
+  assertthat::assert_that(assertthat::has_name(gene_data, "strand"))
+
+  assertthat::assert_that(assertthat::has_name(variant_information, "chr"))
+  assertthat::assert_that(assertthat::has_name(variant_information, "pos"))
 
   #Make GRanges objects
   gene_ranges = GenomicRanges::GRanges(
