@@ -19,21 +19,21 @@ plot_mbv_results <- function(mbv_files_path, output_path){
     df <- mbv_results_list[[i]]
     mbv_sample_name <- names(mbv_results_list)[i]
     
-    df <- df %>% mutate(het_consistent_frac = n_het_consistent/n_het_covered, 
+    df <- df %>% dplyr::mutate(het_consistent_frac = n_het_consistent/n_het_covered, 
                         hom_consistent_frac = n_hom_consistent/n_hom_covered,
                         match = FALSE) %>% 
-      arrange(-het_consistent_frac)
+                 dplyr::arrange(-het_consistent_frac)
     df$match[1] <- TRUE  
     
-    plot_mbv <- ggplot(df, aes(x = het_consistent_frac, y = hom_consistent_frac, label = SampleID, color=match)) + 
-      geom_point() + 
-      scale_color_manual(values=c("red4","darkgreen"))
+    plot_mbv <- ggplot2::ggplot(df, aes(x = het_consistent_frac, y = hom_consistent_frac, label = SampleID, color=match)) + 
+      ggplot2::geom_point() + 
+      ggplot2::scale_color_manual(values=c("red4","darkgreen"))
     
     if (!dir.exists(output_path)) { 
-      dir.create(paste0(output_path, "jpeg/"), recursive = TRUE)
-      dir.create(paste0(output_path, "plotly/dependencies/"), recursive = TRUE)
+      dir.create(paste0(output_path, "/jpeg/"), recursive = TRUE)
+      dir.create(paste0(output_path, "/plotly/dependencies/"), recursive = TRUE)
     }
-    ggsave(filename = paste0(mbv_sample_name, "_mbv_plot.jpeg"), plot = plot_mbv, path = paste0(output_path, "/jpeg"), device = "jpeg")
+    ggplot2::ggsave(filename = paste0(mbv_sample_name, "_mbv_plot.jpeg"), plot = plot_mbv, path = paste0(output_path, "/jpeg"), device = "jpeg")
     
     MDS_ggplotly_plot <- plotly::ggplotly(plot_mbv)
     htmlwidgets::saveWidget(widget = plotly::as_widget(MDS_ggplotly_plot), 
