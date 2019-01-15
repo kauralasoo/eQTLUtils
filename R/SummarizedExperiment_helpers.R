@@ -314,11 +314,14 @@ normaliseSE_quantile <- function(se, assay_name = "usage"){
 #'
 #' @return filtered SummarizedExperiment object where phenotypes with no cis variants are removed.
 #' @export
-checkCisVariants <- function(se, variant_information, cis_distance = 1000000, min_cis_variant = 5){
+checkCisVariants <- function(se, 
+                             variant_information, 
+                             cis_distance = 1000000, 
+                             min_cis_variant = 5) {
 
   #Extract gene metadata from SummarizedExperiment
   gene_data = SummarizedExperiment::rowData(se) %>% as.data.frame() %>% as_tibble()
-
+  
   #Check that all required columns are there
   assertthat::assert_that(assertthat::has_name(gene_data, "chromosome"))
   assertthat::assert_that(assertthat::has_name(gene_data, "phenotype_pos"))
@@ -328,12 +331,19 @@ checkCisVariants <- function(se, variant_information, cis_distance = 1000000, mi
   assertthat::assert_that(assertthat::has_name(variant_information, "pos"))
 
   #Make GRanges objects
-  gene_ranges = GenomicRanges::GRanges(seqnames = gene_data$chromosome,
-                                       ranges = IRanges::IRanges(start = gene_data$phenotype_pos - cis_distance, end = gene_data$phenotype_pos + cis_distance),
-                                       strand = gene_data$strand)
-  var_ranges = GenomicRanges::GRanges(seqnames = var_info$chr,
-                                      ranges = IRanges::IRanges(start = var_info$pos, end = var_info$pos),
-                                      strand = "+")
+  gene_ranges = GenomicRanges::GRanges(
+    seqnames = gene_data$chromosome,
+    ranges = IRanges::IRanges(
+      start = gene_data$phenotype_pos - cis_distance,
+      end = gene_data$phenotype_pos + cis_distance
+    ),
+    strand = "*"
+  )
+  var_ranges = GenomicRanges::GRanges(
+    seqnames = var_info$chr,
+    ranges = IRanges::IRanges(start = var_info$pos, end = var_info$pos),
+    strand = "+"
+  )
   olap_count = GenomicRanges::countOverlaps(gene_ranges, var_ranges, ignore.strand = TRUE)
   count_df = dplyr::select(gene_data, phenotype_id, chromosome, phenotype_pos) %>%
     dplyr::mutate(snp_count = olap_count) %>%
