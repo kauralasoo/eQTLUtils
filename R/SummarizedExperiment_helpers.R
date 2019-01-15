@@ -305,15 +305,6 @@ normaliseSE_quantile <- function(se, assay_name = "usage"){
   return(se)
 }
 
-extractPhenotypeData <- function(se){
-  meta = SummarizedExperiment::rowData(se) %>%
-    as.data.frame() %>%
-    dplyr::as_tibble() %>%
-    dplyr::select(phenotype_id, group_id, gene_id, chromosome, phenotype_pos) #Extract essential columns
-  return(meta)
-}
-
-
 #' Remove phenotypes from SummarizedExperiments that do not have cis genotypes
 #'
 #' @param se SummarizedExperiment object
