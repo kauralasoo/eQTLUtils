@@ -77,7 +77,7 @@ filterSummarizedExperiment <- function(se, valid_chromosomes = NA, valid_gene_ty
     se = se[SummarizedExperiment::rowData(se)$chromosome %in% valid_chromosomes,]
   }
   #Filter gene types
-  if(!is.na(valid_chromosomes[1])){
+  if(!is.na(valid_gene_types[1])){
     assertthat::assert_that(assertthat::has_name(SummarizedExperiment::rowData(se), "gene_type"))
     se = se[SummarizedExperiment::rowData(se)$gene_type %in% valid_gene_types,]
   }
