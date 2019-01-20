@@ -58,8 +58,11 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
   rownames(col_df) = col_data$sample_id
 
   #Make assay list
+  assay = as.matrix(assay)
   assay_list = list()
-  assay_list[[assay_name]] = as.matrix(assay)
+  #Reorder columns and rows to match metadata
+  assay_list[[assay_name]] = assay[rownames(row_df), rownames(col_df)]
+
 
   #Make a summarizedExperiment object
   se = SummarizedExperiment::SummarizedExperiment(
