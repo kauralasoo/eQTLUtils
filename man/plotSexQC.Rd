@@ -4,7 +4,8 @@
 \alias{plotSexQC}
 \title{Generate Sex dependent QC Plot.}
 \usage{
-plotSexQC(study_data, html_output = FALSE, output_dir = "./")
+plotSexQC(study_data, export_output = FALSE, html_output = FALSE,
+  output_dir = "./")
 }
 \arguments{
 \item{study_data}{SummarizedExperiment file to be analysed}

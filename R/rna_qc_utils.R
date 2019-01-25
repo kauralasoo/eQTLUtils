@@ -280,3 +280,25 @@ calculatePCAMatrix <- function(study_data_se, condition = "all"){
   pca_res = eQTLUtils::transformSE_PCA(processed_se, assay_name = "tpms", n_pcs = 10, log_transform = TRUE, center = TRUE, scale. = TRUE)
   return(pca_res$pca_matrix)
 }
+
+#' Generate RNA QC (PCA, MDS, Sex) plots
+#'
+#' @param rds_files_path Path where mbv_output files live
+#' @param output_path Path where the plots will ve saved
+#' @author Nurlan Kerimov
+#' @export
+plot_rna_qc_all <- function(rds_files_path, output_path){
+  rds_files = list.files(rds_files_path, full.names = T)
+  for (rds_file in rds_files) {
+    message(" ## Reading .rds file \'", basename(rds_file), "\'")
+    se <- readr::read_rds(rds_file)
+    message(" ## Generating PCA plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    eQTLUtils::plotPCAAnalysis(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+    
+    message(" ## Generating MDS plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    eQTLUtils::plotMDSAnalysis(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+    
+    message(" ## Generating Sex plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    eQTLUtils::plotSexQC(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+  }
+}
