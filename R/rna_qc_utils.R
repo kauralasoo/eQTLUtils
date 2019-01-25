@@ -160,7 +160,7 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
   }
   
   # choose only protein coding genes and TPM normalise
-  processed_se = eQTLUtils::filterSE_gene_types(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
+  processed_se = eQTLUtils::filterSummarizedExperiment(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1,]
   
   #Perform MDS
@@ -218,7 +218,7 @@ calculatePCAMatrix <- function(study_data_se, condition = "all"){
   }
   
   # choose only protein coding genes and TPM normalise
-  processed_se = eQTLUtils::filterSE_gene_types(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
+  processed_se = eQTLUtils::filterSummarizedExperiment(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1,]
   
   #Perform PCA
