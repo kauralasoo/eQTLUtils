@@ -91,6 +91,51 @@ plotSexQC <- function(study_data, export_output = FALSE, html_output=FALSE, outp
   return(Sex_QC_plot)
 }
 
+#' Generate Sex dependent QC Plot.
+#'
+#' @param study_data SummarizedExperiment file to be analysed
+#' @param html_output Boolean value if html output should be created (Default:FALSE)
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return plotly object of SEX QC
+#' @author Nurlan Kerimov
+#' @export
+plotSexQCFromMatrix <- function(sex_qc_matrix, study_name, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  if (all(is.na(sex_qc_matrix$sex))) { sex_qc_matrix$sex <- "NA"}
+  
+  # generate the plot
+  Sex_QC_plot <- ggplot2::ggplot(sex_qc_matrix, 
+    ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + 
+    ggplot2::geom_point(ggplot2::aes(col=sex)) +
+    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", 
+        title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(sex_qc_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/Sex_QC_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_Sex_QC_Plot.jpeg"), 
+                    width = 6, height = 4, dpi = 300,
+                    plot = Sex_QC_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      sex_ggplotly_plot <- plotly::ggplotly(Sex_QC_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(sex_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_Sex_QC_plot.html")),
+                              libdir = "dependencies")
+    }
+  }
+  
+  return(Sex_QC_plot)
+}
 
 #' Generate Sex dependent QC DataFrame.
 #'
@@ -183,6 +228,48 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", export_output = FA
   return(mds_plot)
 }
 
+#' Generate MDS QC Plot from PCA Matrix
+#'
+#' @param mds_matrix MDS matrix
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return PCA plot of study 
+#' @author Nurlan Kerimov
+#' @export
+plotMSDFromMatrix <- function(mds_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  study_name <- unique(mds_matrix$study)[1]
+  
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
+    ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2", 
+      title = paste0(study_name, " MDS - TPM normalized, log2 | Sample Size: ", nrow(mds_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/MDS_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_MDS.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = mds_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      MDS_ggplotly_plot <- plotly::ggplotly(mds_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), 
+        file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_MDS_plot.html")),
+        libdir = "dependencies")
+    }
+  }
+  
+  return(mds_plot)
+}
 
 #' Generate MDS Matrix for SummarizedExperiment
 #'
@@ -258,6 +345,48 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", export_output = FA
   return(PCA.plot)
 }
 
+
+#' Generate PCA QC Plot from PCA Matrix
+#'
+#' @param pca_matrix PCA matrix
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return PCA plot of study 
+#' @author Nurlan Kerimov
+#' @export
+plotPCAFromMatrix <- function(pca_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  study_name <- unique(pca_matrix$study)[1]
+  
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) + 
+    ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA - TPM normalized, log2 | Sample Size: ", nrow(pca_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/PCA_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_PCA.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = PCA.plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      PCA_ggplotly_plot <- plotly::ggplotly(PCA.plot)
+      htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_PCA_plot.html")),
+                              libdir = "dependencies")
+    }
+  }
+  
+  return(PCA.plot)
+}
 
 #' Generate PCA Matrix for SummarizedExperiment
 #'
