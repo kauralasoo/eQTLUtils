@@ -236,7 +236,6 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", export_output = FA
     output_dir <- paste0(output_dir, "/PCA_plot/")
     if (!dir.exists(output_dir)) { 
       dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
-      
     }
     ggplot2::ggsave(filename = paste0(study_name, "_PCA.jpeg"), 
                     width = 7, height = 3, dpi = 300,
@@ -283,7 +282,7 @@ calculatePCAMatrix <- function(study_data_se, condition = "all"){
 
 #' Generate RNA QC (PCA, MDS, Sex) plots
 #'
-#' @param rds_files_path Path where mbv_output files live
+#' @param rds_files_path Path where SummarizedExperiment files live
 #' @param output_path Path where the plots will ve saved
 #' @author Nurlan Kerimov
 #' @export
@@ -300,5 +299,36 @@ plot_rna_qc_all <- function(rds_files_path, output_path){
     
     message(" ## Generating Sex plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
     plot <- eQTLUtils::plotSexQC(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+  }
+}
+
+#' Export RNA QC (PCA, MDS, Sex) matrices
+#'
+#' @param rds_files_path Path where SummarizedExperiment files live
+#' @param output_path Path where the plots will ve saved
+#' @author Nurlan Kerimov
+#' @export
+calculate_rna_qc_matrices <- function(rds_files_path, output_path){
+  rds_files = list.files(rds_files_path, full.names = T)
+  if (!dir.exists(output_path)) { 
+    dir.create(paste0(output_path, "/PCA_matrices/"), recursive = TRUE)
+    dir.create(paste0(output_path, "/MDS_matrices/"), recursive = TRUE)
+    dir.create(paste0(output_path, "/SexQC_matrices/"), recursive = TRUE)
+  }
+  for (rds_file in rds_files) {
+    message(" ## Reading .rds file \'", basename(rds_file), "\'")
+    se <- readr::read_rds(rds_file)
+    
+    message(" ## Generating PCA matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculatePCAMatrix(se)
+    write_tsv(matrix_se, paste0(output_path, "/PCA_matrices/", basename(rds_file), "_PCA_matrix.tsv"))
+    
+    message(" ## Generating MDS matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculateMDSMatrix(se)
+    write_tsv(matrix_se, paste0(output_path, "/MDS_matrices/", basename(rds_file), "_MDS_matrix.tsv"))
+    
+    message(" ## Generating Sex Matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculateSexQCDataFrame(se)
+    write_tsv(matrix_se, paste0(output_path, "/SexQC_matrices/", basename(rds_file), "_SexQC_matrix.tsv"))
   }
 }
