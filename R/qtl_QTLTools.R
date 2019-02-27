@@ -161,16 +161,45 @@ importQTLtoolsPCA <- function(pca_path){
   return(pca_df)
 }
 
-studySEtoQTLTools <- function(se, assay_name, out_dir){
+#' Split study SummarizedExperiment object into invidiual input files for QTLTools.
+#'
+#' Uses the qtl_group metadata column (required) to split a single SummarizedExperiment
+#' object into multiple independent input files for QTLTools. Write the files directly to disk.
+#'
+#' @param se SummarizedExperiment object.
+#' @param assay_name Name of the assay in the SummarizedExperiment object used for QTL mapping.
+#' @param out_dir Path to the output directory where the QTLTools input files will be written.
+#' @param extra_qtl_group Used to split the datasets using some additional metadata column in additon
+#' to the qtl_group column. This can for example be used to perform sex-specific or population-specific
+#' eQTL analysis.
+#'
+#' @return None
+#' @export
+#'
+#' @examples
+studySEtoQTLTools <- function(se, assay_name, out_dir, extra_qtl_group = NULL){
 
   #Make assertions
   assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "qtl_group"))
   assertthat::assert_that(assertthat::has_name(SummarizedExperiment::assays(se), assay_name))
 
-  #Split the SE into list based on qtl_group
-  qtl_groups = unique(se$qtl_group)
-  group_list = setNames(as.list(qtl_groups), qtl_groups)
-  group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "qtl_group", .))
+  if(is.null(extra_qtl_group)){
+    #Split the SE into list based on qtl_group
+    qtl_groups = unique(se$qtl_group)
+    group_list = setNames(as.list(qtl_groups), qtl_groups)
+    group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "qtl_group", .))
+
+   } else{
+
+    #If extra_qtl_group is specified, then split the dataset using both the qtl_group values
+    #as well as the values of the extra_qtl_group column.
+    assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), extra_qtl_group))
+    col_data = SummarizedExperiment::colData(se)
+    se$new_qtl_group = paste(col_data[,"qtl_group"], col_data[,extra_qtl_group],sep = "_")
+    qtl_groups = unique(se$new_qtl_group)
+    group_list = setNames(as.list(qtl_groups), qtl_groups)
+    group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "new_qtl_group", .))
+  }
 
   #Convert SE onbjects to QTLtools
   qtltools_list = purrr::map(group_se_list, ~convertSEtoQTLtools(., assay_name = assay_name))
