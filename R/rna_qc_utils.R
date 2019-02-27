@@ -35,8 +35,8 @@ plot_mbv_results <- function(mbv_files_path, output_path){
     }
     ggplot2::ggsave(filename = paste0(mbv_sample_name, "_mbv_plot.jpeg"), plot = plot_mbv, path = paste0(output_path, "/jpeg"), device = "jpeg")
     
-    MDS_ggplotly_plot <- plotly::ggplotly(plot_mbv)
-    htmlwidgets::saveWidget(widget = plotly::as_widget(MDS_ggplotly_plot), 
+    MBV_ggplotly_plot <- plotly::ggplotly(plot_mbv)
+    htmlwidgets::saveWidget(widget = plotly::as_widget(MBV_ggplotly_plot), 
                             file = file.path(normalizePath(paste0(output_path, "/plotly")), paste0(mbv_sample_name, "_plotly.html")),
                             libdir = "dependencies")
   }
@@ -51,7 +51,7 @@ plot_mbv_results <- function(mbv_files_path, output_path){
 #' @return plotly object of SEX QC
 #' @author Nurlan Kerimov
 #' @export
-plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
+plotSexQC <- function(study_data, export_output = FALSE, html_output=FALSE, output_dir="./"){
   joined <- calculateSexQCDataFrame(study_data)
   
   if (all(is.na(joined$sex))) { joined$sex <- "NA"}
@@ -61,17 +61,81 @@ plotSexQC <- function(study_data, html_output=FALSE, output_dir="./"){
   Sex_QC_plot <- ggplot2::ggplot(joined, 
     ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + 
     ggplot2::geom_point(ggplot2::aes(col=sex)) +
-    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) 
-  MDS_ggplotly_plot <- plotly::ggplotly()
+    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(joined))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
 
-  if (html_output) {
-    if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_sex_QC.html")))
+
+  if (export_output){
+    output_dir <- paste0(output_dir, "/Sex_QC_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_Sex_QC_Plot.jpeg"), 
+                    width = 6, height = 4, dpi = 300,
+                    plot = Sex_QC_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      sex_ggplotly_plot <- plotly::ggplotly(Sex_QC_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(sex_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_Sex_QC_plot.html")),
+                              libdir = "dependencies")
+    }
   }
   
-  return(MDS_ggplotly_plot)
+  return(Sex_QC_plot)
 }
 
+#' Generate Sex dependent QC Plot.
+#'
+#' @param study_data SummarizedExperiment file to be analysed
+#' @param html_output Boolean value if html output should be created (Default:FALSE)
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return plotly object of SEX QC
+#' @author Nurlan Kerimov
+#' @export
+plotSexQCFromMatrix <- function(sex_qc_matrix, study_name, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  if (all(is.na(sex_qc_matrix$sex))) { sex_qc_matrix$sex <- "NA"}
+  
+  # generate the plot
+  Sex_QC_plot <- ggplot2::ggplot(sex_qc_matrix, 
+    ggplot2::aes(x=(ENSG00000229807+1) %>% log2(), y=(Y_chrom_mean+1) %>% log2(), label = sample_id)) + 
+    ggplot2::geom_point(ggplot2::aes(col=sex)) +
+    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", 
+        title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(sex_qc_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/Sex_QC_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_Sex_QC_Plot.jpeg"), 
+                    width = 6, height = 4, dpi = 300,
+                    plot = Sex_QC_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      sex_ggplotly_plot <- plotly::ggplotly(Sex_QC_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(sex_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_Sex_QC_plot.html")),
+                              libdir = "dependencies")
+    }
+  }
+  
+  return(Sex_QC_plot)
+}
 
 #' Generate Sex dependent QC DataFrame.
 #'
@@ -127,25 +191,85 @@ calculateSexQCDataFrame <- function(study_data){
 #' @return MDS plot of study 
 #' @author Nurlan Kerimov
 #' @export
-plotMDSAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
+plotMDSAnalysis <- function(study_data_se, condition = "all", export_output = FALSE, html_output=FALSE, output_dir="./"){
   mds_matrix = calculateMDSMatrix(study_data_se, condition)
   study_name <- study_data_se$study %>% unique()
   
   mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) + 
     ggplot2::geom_point() + 
-    ggplot2::scale_shape_manual(values=seq(0,6)) +
-    ggplot2::labs(x="Expression XIST", y="Expression genes on Y", title = paste0(study_name, " DS - TPM normalized, log2 | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData()))) 
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
+    ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2", 
+      title = paste0(study_name, " MDS - TPM normalized, log2 | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData()))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
   
-  MDS_ggplotly_plot <- plotly::ggplotly()
-
-  if (html_output) {
-    if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_MDS_plot.html")))
+  if (export_output){
+    output_dir <- paste0(output_dir, "/MDS_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_MDS.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = mds_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      MDS_ggplotly_plot <- plotly::ggplotly(mds_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), 
+        file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_MDS_plot.html")),
+        libdir = "dependencies")
+    }
   }
   
-  return(MDS_ggplotly_plot)
+  return(mds_plot)
 }
 
+#' Generate MDS QC Plot from PCA Matrix
+#'
+#' @param mds_matrix MDS matrix
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return PCA plot of study 
+#' @author Nurlan Kerimov
+#' @export
+plotMSDFromMatrix <- function(mds_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  study_name <- unique(mds_matrix$study)[1]
+  
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
+    ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2", 
+      title = paste0(study_name, " MDS - TPM normalized, log2 | Sample Size: ", nrow(mds_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/MDS_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_MDS.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = mds_plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      MDS_ggplotly_plot <- plotly::ggplotly(mds_plot)
+      htmlwidgets::saveWidget(plotly::as_widget(MDS_ggplotly_plot), 
+        file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_MDS_plot.html")),
+        libdir = "dependencies")
+    }
+  }
+  
+  return(mds_plot)
+}
 
 #' Generate MDS Matrix for SummarizedExperiment
 #'
@@ -160,7 +284,7 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
   }
   
   # choose only protein coding genes and TPM normalise
-  processed_se = eQTLUtils::filterSE_gene_types(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
+  processed_se = eQTLUtils::filterSummarizedExperiment(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1,]
   
   #Perform MDS
@@ -185,25 +309,84 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
 #' @return PCA plot of study 
 #' @author Nurlan Kerimov
 #' @export
-plotPCAAnalysis <- function(study_data_se, condition = "all", html_output=FALSE, output_dir="./"){
+plotPCAAnalysis <- function(study_data_se, condition = "all", export_output = FALSE, html_output=FALSE, output_dir="./"){
   pca_matrix = calculatePCAMatrix(study_data_se, condition)
   study_name <- study_data_se$study %>% unique()
   
   PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) + 
     ggplot2::geom_point() + 
-    ggplot2::scale_shape_manual(values=seq(0,6)) + 
-    ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA analysis | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData())))
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) + 
+    ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA - TPM normalized, log2 | Sample Size: ", nrow(study_data_se %>% SummarizedExperiment::colData()))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
   
-  PCA_ggplotly_plot <- plotly::ggplotly()
-  
-  if (html_output) {
-    if (!dir.exists(output_dir)) { dir.create(output_dir) }
-    htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), file.path(normalizePath(output_dir), paste0(study_name, "_PCA_plot.html")))
+  if (export_output){
+    output_dir <- paste0(output_dir, "/PCA_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_PCA.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = PCA.plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      PCA_ggplotly_plot <- plotly::ggplotly(PCA.plot)
+      htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_PCA_plot.html")),
+                              libdir = "dependencies")
+    }
   }
   
-  return(PCA_ggplotly_plot)
+  return(PCA.plot)
 }
 
+
+#' Generate PCA QC Plot from PCA Matrix
+#'
+#' @param pca_matrix PCA matrix
+#' @param output_dir html file output dir, if html_output is TRUE (Default:current directory)
+#' @return PCA plot of study 
+#' @author Nurlan Kerimov
+#' @export
+plotPCAFromMatrix <- function(pca_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
+  study_name <- unique(pca_matrix$study)[1]
+  
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) + 
+    ggplot2::geom_point() + 
+    ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) + 
+    ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA - TPM normalized, log2 | Sample Size: ", nrow(pca_matrix))) +
+    ggplot2::theme(plot.title = element_text(size = 12, face="italic"))
+  
+  if (export_output){
+    output_dir <- paste0(output_dir, "/PCA_plot/")
+    if (!dir.exists(output_dir)) { 
+      dir.create(paste0(output_dir, "/jpeg/"), recursive = TRUE)
+    }
+    ggplot2::ggsave(filename = paste0(study_name, "_PCA.jpeg"), 
+                    width = 7, height = 3, dpi = 300,
+                    plot = PCA.plot, 
+                    path = paste0(output_dir, "/jpeg"), 
+                    device = "jpeg")
+    
+    if (html_output) {
+      if (!dir.exists(paste0(output_dir, "/plotly/dependencies/"))) { 
+        dir.create(paste0(output_dir, "/plotly/dependencies/"), recursive = TRUE) 
+      }
+      
+      PCA_ggplotly_plot <- plotly::ggplotly(PCA.plot)
+      htmlwidgets::saveWidget(plotly::as_widget(PCA_ggplotly_plot), 
+                              file.path(normalizePath(paste0(output_dir, "/plotly")), paste0(study_name, "_PCA_plot.html")),
+                              libdir = "dependencies")
+    }
+  }
+  
+  return(PCA.plot)
+}
 
 #' Generate PCA Matrix for SummarizedExperiment
 #'
@@ -218,10 +401,63 @@ calculatePCAMatrix <- function(study_data_se, condition = "all"){
   }
   
   # choose only protein coding genes and TPM normalise
-  processed_se = eQTLUtils::filterSE_gene_types(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
+  processed_se = eQTLUtils::filterSummarizedExperiment(study_data_se, valid_gene_types = "protein_coding") %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1,]
   
   #Perform PCA
   pca_res = eQTLUtils::transformSE_PCA(processed_se, assay_name = "tpms", n_pcs = 10, log_transform = TRUE, center = TRUE, scale. = TRUE)
   return(pca_res$pca_matrix)
+}
+
+#' Generate RNA QC (PCA, MDS, Sex) plots
+#'
+#' @param rds_files_path Path where SummarizedExperiment files live
+#' @param output_path Path where the plots will ve saved
+#' @author Nurlan Kerimov
+#' @export
+plot_rna_qc_all <- function(rds_files_path, output_path){
+  rds_files = list.files(rds_files_path, full.names = T)
+  for (rds_file in rds_files) {
+    message(" ## Reading .rds file \'", basename(rds_file), "\'")
+    se <- readr::read_rds(rds_file)
+    message(" ## Generating PCA plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    plot <- eQTLUtils::plotPCAAnalysis(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+    
+    message(" ## Generating MDS plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    plot <- eQTLUtils::plotMDSAnalysis(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+    
+    message(" ## Generating Sex plot for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    plot <- eQTLUtils::plotSexQC(se, export_output = TRUE, html_output = TRUE, output_dir = output_path)
+  }
+}
+
+#' Export RNA QC (PCA, MDS, Sex) matrices
+#'
+#' @param rds_files_path Path where SummarizedExperiment files live
+#' @param output_path Path where the plots will ve saved
+#' @author Nurlan Kerimov
+#' @export
+calculate_rna_qc_matrices <- function(rds_files_path, output_path){
+  rds_files = list.files(rds_files_path, full.names = T)
+  if (!dir.exists(output_path)) { 
+    dir.create(paste0(output_path, "/PCA_matrices/"), recursive = TRUE)
+    dir.create(paste0(output_path, "/MDS_matrices/"), recursive = TRUE)
+    dir.create(paste0(output_path, "/SexQC_matrices/"), recursive = TRUE)
+  }
+  for (rds_file in rds_files) {
+    message(" ## Reading .rds file \'", basename(rds_file), "\'")
+    se <- readr::read_rds(rds_file)
+    
+    message(" ## Generating PCA matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculatePCAMatrix(se)
+    write_tsv(matrix_se, paste0(output_path, "/PCA_matrices/", basename(rds_file), "_PCA_matrix.tsv"))
+    
+    message(" ## Generating MDS matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculateMDSMatrix(se)
+    write_tsv(matrix_se, paste0(output_path, "/MDS_matrices/", basename(rds_file), "_MDS_matrix.tsv"))
+    
+    message(" ## Generating Sex Matrix for \'", basename(rds_file), "\' to \'", output_path, "\'")
+    matrix_se <- eQTLUtils::calculateSexQCDataFrame(se)
+    write_tsv(matrix_se, paste0(output_path, "/SexQC_matrices/", basename(rds_file), "_SexQC_matrix.tsv"))
+  }
 }

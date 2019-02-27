@@ -4,8 +4,8 @@
 \alias{plotPCAAnalysis}
 \title{Generate PCA QC Plot for different cell types}
 \usage{
-plotPCAAnalysis(study_data_se, condition = "all", html_output = FALSE,
-  output_dir = "./")
+plotPCAAnalysis(study_data_se, condition = "all",
+  export_output = FALSE, html_output = FALSE, output_dir = "./")
 }
 \arguments{
 \item{study_data_se}{SummarizedExperiment file to be analysed}
