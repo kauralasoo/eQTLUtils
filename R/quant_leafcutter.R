@@ -64,6 +64,7 @@ leafcutterAnnotateIntrons <- function(leafcutter_ids, intron_annotation_path, tr
     dplyr::mutate(gene_count = ifelse(is.na(gene_count), 0, gene_count)) %>%
     dplyr::mutate(group_pos = as.integer(ceiling((group_start + group_end)/2))) %>%
     dplyr::mutate(phenotype_pos = ifelse(is.na(phenotype_pos), group_pos, phenotype_pos)) %>%
+    dplyr::mutate(gene_type = ifelse(is.na(gene_type), "leafcutter", gene_type)) %>%
     dplyr::mutate(quant_id = group_id) %>%
     dplyr::select(required_gene_meta_columns, everything())
   

@@ -175,8 +175,6 @@ importQTLtoolsPCA <- function(pca_path){
 #'
 #' @return None
 #' @export
-#'
-#' @examples
 studySEtoQTLTools <- function(se, assay_name, out_dir, extra_qtl_group = NULL){
 
   #Make assertions

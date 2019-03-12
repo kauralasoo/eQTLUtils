@@ -4,7 +4,7 @@
 \alias{plotSexQCFromMatrix}
 \title{Generate Sex dependent QC Plot.}
 \usage{
-plotSexQCFromMatrix(sex_qc_matrix, export_output = FALSE,
+plotSexQCFromMatrix(sex_qc_matrix, study_name, export_output = FALSE,
   html_output = FALSE, output_dir = "./")
 }
 \arguments{
