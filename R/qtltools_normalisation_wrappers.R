@@ -54,10 +54,10 @@ qtltoolsPrepareSE <- function(se, quant_method){
                                                           filter_rna_qc = TRUE, filter_genotype_qc = TRUE)
 
       message("Calculating ratios...")
-      se_ratios = eQTLUtils::normaliseSE_ratios(geuvadis_lc_se, assay_name = "counts")
+      se_ratios = eQTLUtils::normaliseSE_ratios(se_filtered, assay_name = "counts")
 
       message("Performing inverse normal transformation...")
-      se_norm = eQTLUtils::normaliseSE_quantile(transcript_ratios, assay_name = "usage")
+      se_norm = eQTLUtils::normaliseSE_quantile(se_ratios, assay_name = "usage")
     }
 
   return(se_norm)
