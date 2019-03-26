@@ -78,6 +78,31 @@ qtltoolsTabixFetchPhenotypes <- function(phenotype_ranges, tabix_file){
   return(result)
 }
 
+# Fetch phenotype_id and snp_id pairs from the tabix file. Extract variant coordinates
+# directly from the snp_id column of the selected_pairs data frame.
+qtltoolsTabixFetchPhenotypeVariantPairs <- function(selected_pairs, tabix_file){
+
+  #Extract variant coordinates from variant id
+  var_coords = tidyr::separate(selected_pairs, snp_id, into = c("chr", "pos", "ref", "alt"), remove = F) %>%
+    dplyr::mutate(chr = stringr::str_replace(chr, "chr", "")) %>%
+    dplyr::mutate(pos = as.integer(pos)) %>%
+    dplyr::select(-ref, -alt)
+
+  #Make a Granges object
+  ranges = GenomicRanges::GRanges(seqnames = var_coords$chr,
+                                  ranges = IRanges(start = var_coords$pos, end = var_coords$pos),
+                                  strand = "*")
+  elementMetadata(ranges) = dplyr::select(var_coords, -chr, -pos)
+
+  #Fetch data from tabix
+  tabix_data = eQTLUtils::qtltoolsTabixFetchPhenotypes(
+    tabix_file = tabix_file,
+    phenotype_ranges = ranges) %>%
+    purrr::map_df(identity) %>%
+    dplyr::semi_join(var_coords, by = c("phenotype_id", "snp_id"))
+  return(tabix_data)
+}
+
 
 #' Post-process QTLTools mbv results to find the best matching individual for each sample
 #'
