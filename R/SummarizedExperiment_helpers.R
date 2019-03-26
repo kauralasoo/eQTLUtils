@@ -98,6 +98,7 @@ filterSummarizedExperiment <- function(se, valid_chromosomes = NA, valid_gene_ty
 }
 
 normaliseSE_cqn <- function(se, assay_name = "counts"){
+  require("cqn")
 
   #Extract fields
   row_data = SummarizedExperiment::rowData(se)
