@@ -77,7 +77,7 @@ qtltoolsTabixFetchPhenotypes <- function(phenotype_ranges, tabix_file){
     }
 
     #Add additional columns
-    result[[selected_phenotype_id]] = tabix_table
+    result[[i]] = tabix_table
   }
   return(result)
 }
