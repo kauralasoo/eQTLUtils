@@ -59,18 +59,22 @@ qtltoolsTabixFetchPhenotypes <- function(phenotype_ranges, tabix_file){
   assertthat::assert_that(assertthat::has_name(GenomicRanges::elementMetadata(phenotype_ranges), "phenotype_id"))
 
   #Set column names for rasqual
-  fastqtl_columns = c("phenotype_id","pheno_chr","pheno_start", "pheno_end",
+  qtltools_columns = c("phenotype_id","pheno_chr","pheno_start", "pheno_end",
                       "strand","n_snps", "distance", "snp_id", "snp_chr",
                       "snp_start", "snp_end", "p_nominal","beta", "is_lead")
-  fastqtl_coltypes = "cciiciicciiddi"
+  qtltools_coltypes = "cciiciicciiddi"
 
   result = list()
   for (i in seq_along(phenotype_ranges)){
     selected_phenotype_id = phenotype_ranges[i]$phenotype_id
     print(i)
     tabix_table = scanTabixDataFrame(tabix_file, phenotype_ranges[i],
-                                     col_names = fastqtl_columns, col_types = fastqtl_coltypes)[[1]] %>%
-      dplyr::filter(phenotype_id == selected_phenotype_id)
+                                     col_names = qtltools_columns, col_types = qtltools_coltypes)[[1]]
+
+    #Filter by phenotype id if the tabix table is not null
+    if(!is.null(tabix_table)){
+      tabix_table = dplyr::filter(tabix_table, phenotype_id == selected_phenotype_id)
+    }
 
     #Add additional columns
     result[[selected_phenotype_id]] = tabix_table
