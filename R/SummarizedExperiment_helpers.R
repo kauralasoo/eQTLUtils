@@ -239,24 +239,6 @@ subsetSEByColumnValue <- function(se, column, value){
   return(result)
 }
 
-constructTxreviseRowData <- function(phenotype_ids, transcript_meta){
-
-  #Split phenotype ids into components
-  event_metadata = dplyr::data_frame(phenotype_id = phenotype_ids) %>%
-    tidyr::separate(phenotype_id, c("gene_id", "txrevise_grp", "txrevise_pos", "transcript_id"), sep = "\\.", remove = FALSE) %>%
-    dplyr::mutate(group_id = paste(gene_id, txrevise_pos, sep = "."), quant_id = paste(gene_id, txrevise_grp, txrevise_pos, sep = ".")) %>%
-    dplyr::select(phenotype_id, quant_id, group_id, gene_id)
-
-  #Extract gene metadata
-  gene_data = dplyr::select(transcript_meta, gene_id, chromosome, gene_start, gene_end, strand,
-                            gene_name, gene_type, gene_gc_content, gene_version) %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
-    as.data.frame()
-
-  row_data = dplyr::left_join(event_metadata, gene_data, by = "gene_id")
-  return(row_data)
-}
 
 normaliseSE_ratios <- function(se, assay_name = "tpms"){
 
