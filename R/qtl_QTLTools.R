@@ -134,6 +134,22 @@ mbvFindBestMatch <- function(mbv_df){
   return(best_row)
 }
 
+#Import MBV output files for all samples in a studt
+mbvImportData <- function(mbv_dir, suffix = ".mbv_output.txt"){
+
+  #List all files
+  mbv_files = list.files(mbv_dir, full.names = T)
+  mbv_files = mbv_files[grep(suffix, mbv_files)]
+
+  #Make sample names
+  sample_names = stringr::str_replace_all(basename(mbv_files), suffix, "")
+  sample_list = setNames(mbv_files, sample_names)
+
+  #Import mbv files
+  mbv_results = purrr::map(sample_list, ~readr::read_delim(., delim = " ", col_types = "ciiiiiiiiii"))
+
+  return(mbv_results)
+}
 
 #' Convert SummarizedExperiment object into a bed file suitable for QTLTools
 #'
