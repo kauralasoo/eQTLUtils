@@ -4,12 +4,15 @@
 \alias{calculatePCAMatrix}
 \title{Generate PCA Matrix for SummarizedExperiment}
 \usage{
-calculatePCAMatrix(study_data_se, condition = "all")
+calculatePCAMatrix(study_data_se, condition = "all",
+  return_pca_object = FALSE)
 }
 \arguments{
 \item{study_data_se}{SummarizedExperiment file to be analysed}
 
 \item{condition}{if needed PCA matrix of specific condition}
+
+\item{return_pca_object}{boolean value: return the whole pca object instead of matrix}
 }
 \value{
 PCA Matrix of study
