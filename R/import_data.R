@@ -40,6 +40,22 @@ importBiomartMetadata <- function(biomart_path){
   return(transcript_meta)
 }
 
+extractGeneMetadataFromBiomartFile <- function(biomart_df){
+  required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id",
+                                 "chromosome","gene_start","gene_end","strand",
+                                 "gene_name","gene_type","gene_gc_content",
+                                 "gene_version","phenotype_pos")
+
+  #Extract gene metadata
+  gene_data = dplyr::select(biomart_df, gene_id, chromosome, gene_start, gene_end, strand,
+                            gene_name, gene_type, gene_gc_content, gene_version) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
+    dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
+    dplyr::select(required_gene_meta_columns, everything())
+  return(gene_data)
+}
+
 #' Import variant information extracted from VCF file into R
 #'
 #' The variant information text file can be generated from the VCF using the following

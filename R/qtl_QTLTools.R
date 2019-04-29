@@ -59,23 +59,52 @@ qtltoolsTabixFetchPhenotypes <- function(phenotype_ranges, tabix_file){
   assertthat::assert_that(assertthat::has_name(GenomicRanges::elementMetadata(phenotype_ranges), "phenotype_id"))
 
   #Set column names for rasqual
-  fastqtl_columns = c("phenotype_id","pheno_chr","pheno_start", "pheno_end",
+  qtltools_columns = c("phenotype_id","pheno_chr","pheno_start", "pheno_end",
                       "strand","n_snps", "distance", "snp_id", "snp_chr",
                       "snp_start", "snp_end", "p_nominal","beta", "is_lead")
-  fastqtl_coltypes = "cciiciicciiddi"
+  qtltools_coltypes = "cciiciicciiddi"
 
   result = list()
   for (i in seq_along(phenotype_ranges)){
     selected_phenotype_id = phenotype_ranges[i]$phenotype_id
     print(i)
     tabix_table = scanTabixDataFrame(tabix_file, phenotype_ranges[i],
-                                     col_names = fastqtl_columns, col_types = fastqtl_coltypes)[[1]] %>%
-      dplyr::filter(phenotype_id == selected_phenotype_id)
+                                     col_names = qtltools_columns, col_types = qtltools_coltypes)[[1]]
+
+    #Filter by phenotype id if the tabix table is not null
+    if(!is.null(tabix_table)){
+      tabix_table = dplyr::filter(tabix_table, phenotype_id == selected_phenotype_id)
+    }
 
     #Add additional columns
-    result[[selected_phenotype_id]] = tabix_table
+    result[[i]] = tabix_table
   }
   return(result)
+}
+
+# Fetch phenotype_id and snp_id pairs from the tabix file. Extract variant coordinates
+# directly from the snp_id column of the selected_pairs data frame.
+qtltoolsTabixFetchPhenotypeVariantPairs <- function(selected_pairs, tabix_file){
+
+  #Extract variant coordinates from variant id
+  var_coords = tidyr::separate(selected_pairs, snp_id, into = c("chr", "pos", "ref", "alt"), remove = F) %>%
+    dplyr::mutate(chr = stringr::str_replace(chr, "chr", "")) %>%
+    dplyr::mutate(pos = as.integer(pos)) %>%
+    dplyr::select(-ref, -alt)
+
+  #Make a Granges object
+  ranges = GenomicRanges::GRanges(seqnames = var_coords$chr,
+                                  ranges = IRanges(start = var_coords$pos, end = var_coords$pos),
+                                  strand = "*")
+  elementMetadata(ranges) = dplyr::select(var_coords, -chr, -pos)
+
+  #Fetch data from tabix
+  tabix_data = eQTLUtils::qtltoolsTabixFetchPhenotypes(
+    tabix_file = tabix_file,
+    phenotype_ranges = ranges) %>%
+    purrr::map_df(identity) %>%
+    dplyr::semi_join(var_coords, by = c("phenotype_id", "snp_id"))
+  return(tabix_data)
 }
 
 
@@ -105,6 +134,22 @@ mbvFindBestMatch <- function(mbv_df){
   return(best_row)
 }
 
+#Import MBV output files for all samples in a studt
+mbvImportData <- function(mbv_dir, suffix = ".mbv_output.txt"){
+
+  #List all files
+  mbv_files = list.files(mbv_dir, full.names = T)
+  mbv_files = mbv_files[grep(suffix, mbv_files)]
+
+  #Make sample names
+  sample_names = stringr::str_replace_all(basename(mbv_files), suffix, "")
+  sample_list = setNames(mbv_files, sample_names)
+
+  #Import mbv files
+  mbv_results = purrr::map(sample_list, ~readr::read_delim(., delim = " ", col_types = "ciiiiiiiiii"))
+
+  return(mbv_results)
+}
 
 #' Convert SummarizedExperiment object into a bed file suitable for QTLTools
 #'
@@ -175,8 +220,6 @@ importQTLtoolsPCA <- function(pca_path){
 #'
 #' @return None
 #' @export
-#'
-#' @examples
 studySEtoQTLTools <- function(se, assay_name, out_dir, extra_qtl_group = NULL){
 
   #Make assertions
