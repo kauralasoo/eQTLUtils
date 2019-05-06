@@ -155,16 +155,14 @@ log2_transform <- function(mat){
 #' @importFrom dplyr "%>%"
 #' @export
 #'
-array_normaliseSE <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE, filter_quality = TRUE){
+array_normaliseSE <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE){
   valid_methods <- c("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant") # Quantile normalization, Robust spline normalization
 
   if (!(norm_method %in% valid_methods))
     stop(paste0("Not a valid method. Please use value from the following list: ", paste0(valid_methods, collapse=", ")))
 
   processed_se = se
-  if(filter_quality){
-    processed_se = processed_se[,processed_se$rna_qc_passed==TRUE]
-  }
+
   # Extract fields
   row_data = SummarizedExperiment::rowData(processed_se)
   col_data = SummarizedExperiment::colData(processed_se)
@@ -172,6 +170,11 @@ array_normaliseSE <- function(se, norm_method = "quantile", assay_name = "exprs"
 
   # Batch adjustment
   if(adjust_batch & length(table(col_data$batch)) > 1){
+    message("Perform batch adjustment ...")
+
+    #Check that required columns are present in the metadata
+    assertthat::assert_that(assertthat::has_name(col_data, "batch"))
+
     adj_se = array_RemoveBatch(processed_se, assay_name=assay_name)
     assays = SummarizedExperiment::assays(adj_se)
     expr_matrix = assays[["batch_exprs"]]
