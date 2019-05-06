@@ -5,7 +5,7 @@
 #'
 #' @return Normalised SummarizedExperiment object
 #' @export
-qtltoolsPrepareSE <- function(se, quant_method){
+qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_genotype_qc = TRUE){
   require("cqn")
 
   #Specify valid chromsomes and valid gene types
@@ -23,7 +23,7 @@ qtltoolsPrepareSE <- function(se, quant_method){
     #Filter SE to keep correct chromosomes and QC-passed samples
     se_filtered = filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
                                              valid_gene_types = valid_gene_types,
-                                             filter_rna_qc = TRUE, filter_genotype_qc = TRUE)
+                                             filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
     #Identify expressed genes (At least 1 count in 10% of the samples)
     se_expressed = filterSE_expressedGenes(se_filtered, min_count = 1, min_fraction = 0.1, assay_name = "counts")
@@ -35,7 +35,7 @@ qtltoolsPrepareSE <- function(se, quant_method){
     #Filter SE to keep correct chromosomes and QC-passed samples
     message(" ## Filterin out invalid chromosomes, RNA_QC failed samples and genotype_QC failed samples ")
     se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
-                                                            filter_rna_qc = TRUE, filter_genotype_qc = TRUE)
+                                                            filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
     #Normalize and regress out batch effects
     message(" ## Normalizing and regressing out the batch effects")
@@ -51,13 +51,27 @@ qtltoolsPrepareSE <- function(se, quant_method){
       #Filter se to keep correct chromosomes and gene biotypes
       se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
                                                           valid_gene_types = valid_gene_types,
-                                                          filter_rna_qc = TRUE, filter_genotype_qc = TRUE)
+                                                          filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
       message("Calculating ratios...")
       se_ratios = eQTLUtils::normaliseSE_ratios(se_filtered, assay_name = "counts")
 
       message("Performing inverse normal transformation...")
       se_norm = eQTLUtils::normaliseSE_quantile(se_ratios, assay_name = "usage")
+
+    } else if(quant_method == "txrevise"){
+
+      #Filter SE to keep correct chromosomes and QC-passed samples
+      se_filtered = filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
+                                               valid_gene_types = valid_gene_types,
+                                               filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
+
+      message("Calculating ratios...")
+      se_ratios = eQTLUtils::normaliseSE_ratios(se_filtered, assay_name = "tpms")
+
+      message("Performing inverse normal transformation...")
+      se_norm = eQTLUtils::normaliseSE_quantile(se_ratios, assay_name = "usage")
+
     }
 
   return(se_norm)
