@@ -5,7 +5,7 @@
 \title{Normalise microarray data using lumiN function}
 \usage{
 array_normaliseSE(se, norm_method = "quantile", assay_name = "exprs",
-  log_transform = TRUE, adjust_batch = FALSE, filter_quality = TRUE)
+  log_transform = TRUE, adjust_batch = FALSE)
 }
 \arguments{
 \item{se}{SummarizedExperiment file to be normalised}
