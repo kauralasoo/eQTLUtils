@@ -1,4 +1,4 @@
-makeFeatureCountsSummarizedExperiemnt <- function(featureCounts, transcript_metadata, sample_metadata){
+makeFeatureCountsSummarizedExperiment <- function(featureCounts, transcript_metadata, sample_metadata){
 
   #Specify required gene metadata columns
   required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id","chromosome","gene_start",
@@ -45,6 +45,53 @@ makeFeatureCountsSummarizedExperiemnt <- function(featureCounts, transcript_meta
     colData = sample_meta,
     rowData = gene_data)
 
+  return(se)
+}
+
+makeSummarizedExperimentForQTL <- function(featureCounts, transcript_metadata, sample_metadata){
+  
+  #Specify required gene metadata columns
+  required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id","chromosome","gene_start",
+                                 "gene_end","strand","gene_name","gene_type","gene_gc_content","gene_version","phenotype_pos")
+  
+  #Extract gene metadata
+  gene_data = dplyr::select(transcript_metadata, gene_id, chromosome, gene_start, gene_end, strand,
+                            gene_name, gene_type, gene_gc_content, gene_version) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
+    dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
+    dplyr::select(required_gene_meta_columns, everything()) %>% #Reorder columns
+    as.data.frame()
+  rownames(gene_data) = gene_data$gene_id
+  
+  #identify shared genes
+  shared_genes = intersect(featureCounts$phenotype_id, gene_data$gene_id)
+  gene_data = gene_data[shared_genes,]
+  
+  #Make a read counts matrix
+  count_matrix = dplyr::select(featureCounts, -phenotype_id)
+  count_matrix = as.matrix(count_matrix)
+  row.names(count_matrix) = featureCounts$phenotype_id
+  count_matrix = count_matrix[shared_genes,]
+  
+  #Add gene lengths to the gene metadata file
+  gene_data$gene_length = abs(gene_data$gene_end - gene_data$gene_start)
+  
+  #Identify shared samples
+  shared_samples = intersect(sample_metadata$sample_id, colnames(count_matrix))
+  count_matrix = count_matrix[,shared_samples]
+  
+  #Prepare sample metadata
+  sample_meta = as.data.frame(sample_metadata)
+  row.names(sample_meta) = sample_meta$sample_id
+  sample_meta = sample_meta[shared_samples,]
+  
+  #Make a summarizedExperiment object
+  se = SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = count_matrix),
+    colData = sample_meta,
+    rowData = gene_data)
+  
   return(se)
 }
 
@@ -196,6 +243,11 @@ transformSE_PCA <- function(se, assay_name = "cqn", n_pcs = NULL, log_transform 
 
 removeGeneVersion <- function(read_counts){
   read_counts$gene_id = (dplyr::select(read_counts, gene_id) %>% tidyr::separate(gene_id, c("gene_id", "suffix"), sep = "\\."))$gene_id
+  return(read_counts)
+}
+
+reformatPhenotypeId <- function(read_counts){
+  read_counts$phenotype_id = (dplyr::select(read_counts, phenotype_id) %>% tidyr::separate(phenotype_id, c("phenotype_id", "suffix"), sep = "\\."))$phenotype_id
   return(read_counts)
 }
 
