@@ -33,7 +33,7 @@ plot_mbv_results <- function(mbv_files_path, output_path){
       dir.create(paste0(output_path, "/jpeg/"), recursive = TRUE)
       dir.create(paste0(output_path, "/plotly/dependencies/"), recursive = TRUE)
     }
-    ggplot2::ggsave(filename = paste0(mbv_sample_name, "_mbv_plot.jpeg"), plot = plot_mbv, path = paste0(output_path, "/jpeg"), device = "jpeg")
+    suppressMessages(ggplot2::ggsave(filename = paste0(mbv_sample_name, "_mbv_plot.jpeg"), plot = plot_mbv, path = paste0(output_path, "/jpeg"), device = "jpeg"))
     
     MBV_ggplotly_plot <- plotly::ggplotly(plot_mbv)
     htmlwidgets::saveWidget(widget = plotly::as_widget(MBV_ggplotly_plot), 
