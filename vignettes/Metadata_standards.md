@@ -19,7 +19,7 @@
 
 ### Optional columns
 *   **phenotype_gc_content** - Percentage GC content of the quantified phenotype. Currently used as a covariate by cqn when normalising gene-level and exon-level counts. For genes, this is exracted directly from Ensembl biomart. For exons it is calculated using bedtools nuc command. 
-**phenotype_length** - Length of the phenotype in base pairs. Currently used for gene-level and exon-level counts. Used by cqn and TPM normalisation techniques.
+* **phenotype_length** - Length of the phenotype in base pairs. Currently used for gene-level and exon-level counts. Used by cqn and TPM normalisation techniques.
 
 ### Definition of the the *cis* window
 The center point of the *cis* window is defined by the **phenotype_pos** column in the phenotype metadata file:
@@ -33,5 +33,5 @@ The center point of the *cis* window is defined by the **phenotype_pos** column 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTMyNzU1NTk3M119
+eyJoaXN0b3J5IjpbMTgxNTA1NDc3OSwxMzI3NTU1OTczXX0=
 -->
