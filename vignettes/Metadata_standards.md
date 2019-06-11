@@ -17,17 +17,12 @@
 -  **protocol** - RNA-seq protocol used, valid types are “poly(A)” or “total”. For microarray datasets this should be the microarray platform used (e.g. HumanHT-12_V4 or hugene_10_ST). 
 -  **rna_qc_passed** - Sample has passed RNA QC (TRUE/FALSE)
 -  **genotype_qc_passed** - Sample has passed genotype QC (TRUE/FALSE) 
--   **study* - unique identifier for the study, usually last name of the first author + year of publication (e.g. Fairfax_2014). The exceptions are studies with established well-known names (GTEx, HipSci, GEUVADIS).
+-  **study** - unique identifier for the study, usually last name of the first author + year of publication (e.g. Fairfax_2014). The exceptions are studies with established well-known names (GTEx, HipSci, GEUVADIS).
     
-
-Optional columns
-
--   batch - batch of the RNA-seq or microarray experiment. Used for regressing out batch effects in the microarray datasets.
-    
--   marker - Commonly known cell type marker used for sorting cells, such ad CD4 or CD8 for T-cells and CD14 for monocytes.
-    
-
-age - Age of the donor in years.
+### Optional columns
+-  **batch** - batch of the RNA-seq or microarray experiment. Used for regressing out batch effects in the microarray datasets.
+-  **marker** - Commonly known cell type marker used for sorting cells, such ad CD4 or CD8 for T-cells and CD14 for monocytes.
+- **age** - Age of the donor in years.
 
 ## Phenotype metadata
 ### Required columns
@@ -60,6 +55,6 @@ The center point of the *cis* window is defined by the **phenotype_pos** column 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE2NjIyMjU4NzksMTEzMzQ5MzM2NSwxMz
-I3NTU1OTczXX0=
+eyJoaXN0b3J5IjpbLTM5MzcyMDE0OSwxMTMzNDkzMzY1LDEzMj
+c1NTU5NzNdfQ==
 -->
