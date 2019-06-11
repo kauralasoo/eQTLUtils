@@ -142,7 +142,7 @@ normaliseSE_cqn <- function(se, assay_name = "counts"){
   count_matrix = assays[[assay_name]]
   expression_cqn = cqn::cqn(counts = count_matrix,
                             x = row_data$phenotype_gc_content,
-                            lengths = row_data$gene_length, verbose = TRUE)
+                            lengths = row_data$phenotype_length, verbose = TRUE)
   cqn_matrix = expression_cqn$y + expression_cqn$offset
 
   #Update assays
