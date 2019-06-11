@@ -1,6 +1,45 @@
 # Metadata standards
 
 ## Sample metadata
+### Required columns
+
+-   **sample_id** - unique identifier for each sample. Preferably this should the BioSample id (SAMEAXXX) if available. Alternatively run ids from ENA (ERR*) or GEO (GSE*) are also allowed. Finally, if none of the above are available then the original IDs from the study authors are also accepted. 
+-   **genotype_id** - unique identifier for each individual in a study. This should exactly match the sample ids in the study VCF file. Note that usually sample_id != genotype_id, because many studies contain multiple samples from the same individual. For RNA-seq data, this should be validated using QTLtools mbv tool, to ensure that no sample swaps have occured.
+-   **sex** - Biological sex of the sample. This should be validated based on the gene expression data. Valid values: male, female, NA.
+    
+-   **cell_type - Cell type or tissue of the sample.
+    
+-   condition - Experimental condition used. For most studies this should be set to ‘naive’.
+    
+-   qtl_group - Unique combinations of cell types, conditions and other factors. This field is used the to split each dataset into subsets in which each individual occurs only once (i.e. if multiple cell types, stimulation or timepoints are collected from the same set of individuals)
+    
+-   timepoint - Timepoint of the stimulation, set to 0 if no stimulation was performed.
+    
+-   type - either RNA-seq or microarray.
+    
+-   read_length - RNA-seq read length used (e.g. “75bp”)
+    
+-   stranded - TRUE if strand-specific RNA-seq protocol was used, FALSE otherwise.
+    
+-   paired - TRUE if paired-end sequencing was used, FALSE otherwise.
+    
+-   protocol - RNA-seq protocol used, valid types are “poly(A)” or “total”. For microarray datasets this should be the microarray platform used (e.g. HumanHT-12_V4 or hugene_10_ST).
+    
+-   rna_qc_passed - Sample has passed RNA QC (TRUE/FALSE)
+    
+-   genotype_qc_passed - Sample has passed genotype QC (TRUE/FALSE)
+    
+-   study - unique identifier for the study, usually last name of the first author + year of publication (e.g. Fairfax_2014). The exceptions are studies with established well-known names (GTEx, HipSci, GEUVADIS).
+    
+
+Optional columns
+
+-   batch - batch of the RNA-seq or microarray experiment. Used for regressing out batch effects in the microarray datasets.
+    
+-   marker - Commonly known cell type marker used for sorting cells, such ad CD4 or CD8 for T-cells and CD14 for monocytes.
+    
+
+age - Age of the donor in years.
 
 ## Phenotype metadata
 ### Required columns
@@ -33,5 +72,6 @@ The center point of the *cis* window is defined by the **phenotype_pos** column 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTEzMzQ5MzM2NSwxMzI3NTU1OTczXX0=
+eyJoaXN0b3J5IjpbLTU4Njk4NjcxMywxMTMzNDkzMzY1LDEzMj
+c1NTU5NzNdfQ==
 -->
