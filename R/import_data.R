@@ -31,8 +31,8 @@ scanTabixDataFrame <- function(tabix_file, param, ...){
 
 
 #Import transcript metadata from biomart web export
-importBiomartMetadata <- function(biomart_path){
-  transcript_meta = readr::read_tsv(biomart_path)
+importBiomartMetadata <- function(biomart_path, col_types = "ccccccciciiciiiiccccccccidccccii"){
+  transcript_meta = readr::read_tsv(biomart_path, col_types = col_types)
   col_df = dplyr::data_frame(column_name = c('Gene stable ID', 'Transcript stable ID', 'Chromosome/scaffold name', 'Gene start (bp)', 'Gene end (bp)', 'Strand', 'Transcript start (bp)', 'Transcript end (bp)', 'Transcription start site (TSS)', 'Transcript length (including UTRs and CDS)', 'Transcript support level (TSL)', 'APPRIS annotation', 'GENCODE basic annotation', 'Gene name', 'Transcript name', 'Transcript count', 'Transcript type', 'Gene type', 'Gene % GC content', 'Version (gene)', 'Version (transcript)'),
                              column_id = c('gene_id', 'transcript_id', 'chromosome', 'gene_start', 'gene_end', 'strand', 'transcript_start', 'transcript_end', 'tss', 'transcript_length', 'transcript_tsl', 'transcript_appris', 'is_gencode_basic', 'gene_name', 'transcript_name', 'transcript_count', 'transcript_type', 'gene_type', 'gene_gc_content', 'gene_version', 'transcript_version'))
   transcript_meta = transcript_meta[,col_df$column_name] %>% dplyr::distinct()
@@ -51,8 +51,8 @@ extractGeneMetadataFromBiomartFile <- function(biomart_df){
                             gene_name, gene_type, gene_gc_content, gene_version) %>%
     dplyr::distinct() %>%
     dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
-    dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
-    dplyr::select(required_gene_meta_columns, everything())
+    dplyr::mutate(phenotype_pos = ifelse(strand == 1, gene_start, gene_end)) %>%
+    dplyr::select(required_gene_meta_columns, dplyr::everything())
   return(gene_data)
 }
 
