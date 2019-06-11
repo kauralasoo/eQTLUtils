@@ -452,8 +452,12 @@ calculatePCAMatrix <- function(study_data_se, condition = "all", return_pca_obje
                                                        valid_gene_types = valid_gene_types) %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1, ]
   
+  n_pcs = 10
+  if (ncol(processed_se) < 10) 
+    { n_pcs = ncol(processed_se) } 
+  
   #Perform PCA
-  pca_res = eQTLUtils::transformSE_PCA(processed_se, assay_name = "tpms", n_pcs = 10, log_transform = TRUE, center = TRUE, scale. = TRUE)
+  pca_res = eQTLUtils::transformSE_PCA(processed_se, assay_name = "tpms", n_pcs = n_pcs, log_transform = TRUE, center = TRUE, scale. = TRUE)
   if (return_pca_object) {
     return(pca_res)
   } else {

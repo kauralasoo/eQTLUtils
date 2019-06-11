@@ -2,11 +2,11 @@ makeFeatureCountsSummarizedExperiment <- function(featureCounts, transcript_meta
 
   #Specify required gene metadata columns
   required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id","chromosome","gene_start",
-                                 "gene_end","strand","gene_name","gene_type","gene_gc_content","gene_version","phenotype_pos")
+                                 "gene_end","strand","gene_name","gene_type","phenotype_gc_content","gene_version","phenotype_pos")
 
   #Extract gene metadata
   gene_data = dplyr::select(transcript_metadata, gene_id, chromosome, gene_start, gene_end, strand,
-                            gene_name, gene_type, gene_gc_content, gene_version) %>%
+                            gene_name, gene_type, phenotype_gc_content, gene_version) %>%
     dplyr::distinct() %>%
     dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
     dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
@@ -25,7 +25,7 @@ makeFeatureCountsSummarizedExperiment <- function(featureCounts, transcript_meta
   count_matrix = count_matrix[shared_genes,]
 
   #Add gene lengths to the gene metadata file
-  length_df = dplyr::transmute(read_counts, gene_id, gene_length = length)
+  length_df = dplyr::transmute(read_counts, gene_id, phenotype_length = length)
   gene_data = dplyr::left_join(gene_data, length_df, by = "gene_id") %>%
     as.data.frame()
   rownames(gene_data) = gene_data$gene_id
@@ -48,53 +48,6 @@ makeFeatureCountsSummarizedExperiment <- function(featureCounts, transcript_meta
   return(se)
 }
 
-makeSummarizedExperimentForQTL <- function(featureCounts, transcript_metadata, sample_metadata){
-  
-  #Specify required gene metadata columns
-  required_gene_meta_columns = c("phenotype_id","quant_id","group_id","gene_id","chromosome","gene_start",
-                                 "gene_end","strand","gene_name","gene_type","gene_gc_content","gene_version","phenotype_pos")
-  
-  #Extract gene metadata
-  gene_data = dplyr::select(transcript_metadata, gene_id, chromosome, gene_start, gene_end, strand,
-                            gene_name, gene_type, gene_gc_content, gene_version) %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(phenotype_id = gene_id, group_id = gene_id, quant_id = gene_id) %>%
-    dplyr::mutate(phenotype_pos = as.integer(ceiling((gene_end + gene_start)/2))) %>%
-    dplyr::select(required_gene_meta_columns, everything()) %>% #Reorder columns
-    as.data.frame()
-  rownames(gene_data) = gene_data$gene_id
-  
-  #identify shared genes
-  shared_genes = intersect(featureCounts$phenotype_id, gene_data$gene_id)
-  gene_data = gene_data[shared_genes,]
-  
-  #Make a read counts matrix
-  count_matrix = dplyr::select(featureCounts, -phenotype_id)
-  count_matrix = as.matrix(count_matrix)
-  row.names(count_matrix) = featureCounts$phenotype_id
-  count_matrix = count_matrix[shared_genes,]
-  
-  #Add gene lengths to the gene metadata file
-  gene_data$gene_length = abs(gene_data$gene_end - gene_data$gene_start)
-  
-  #Identify shared samples
-  shared_samples = intersect(sample_metadata$sample_id, colnames(count_matrix))
-  count_matrix = count_matrix[,shared_samples]
-  
-  #Prepare sample metadata
-  sample_meta = as.data.frame(sample_metadata)
-  row.names(sample_meta) = sample_meta$sample_id
-  sample_meta = sample_meta[shared_samples,]
-  
-  #Make a summarizedExperiment object
-  se = SummarizedExperiment::SummarizedExperiment(
-    assays = list(counts = count_matrix),
-    colData = sample_meta,
-    rowData = gene_data)
-  
-  return(se)
-}
-
 makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
 
   #Make dfs
@@ -111,6 +64,35 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
   assay_list[[assay_name]] = assay[rownames(row_df), rownames(col_df)]
 
 
+  #Make a summarizedExperiment object
+  se = SummarizedExperiment::SummarizedExperiment(
+    assays = assay_list,
+    colData = col_df,
+    rowData = row_df)
+}
+
+
+makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, assay_name = "counts"){
+  #Make dfs
+  row_df = as.data.frame(row_data)
+  rownames(row_df) = row_data$phenotype_id
+  
+  col_df = as.data.frame(col_data)
+  rownames(col_df) = col_data$sample_id
+  
+  shared_samples <- intersect(col_df$sample_id, colnames(assay))
+  col_df <- col_df[shared_samples,]
+
+  assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% eQTLUtils::reformatPhenotypeId()
+  rownames(assay) <- assay$phenotype_id
+  assay = assay[,shared_samples]  
+  
+  #Make assay list
+  assay = as.matrix(assay)
+  assay_list = list()
+  #Reorder columns and rows to match metadata
+  assay_list[[assay_name]] = assay[rownames(row_df), rownames(col_df)]
+  
   #Make a summarizedExperiment object
   se = SummarizedExperiment::SummarizedExperiment(
     assays = assay_list,
@@ -153,13 +135,13 @@ normaliseSE_cqn <- function(se, assay_name = "counts"){
   assays = SummarizedExperiment::assays(se)
 
   #Ensure that required columns are present
-  assertthat::assert_that(assertthat::has_name(row_data, "gene_length"))
-  assertthat::assert_that(assertthat::has_name(row_data, "gene_gc_content"))
+  assertthat::assert_that(assertthat::has_name(row_data, "phenotype_length"))
+  assertthat::assert_that(assertthat::has_name(row_data, "phenotype_gc_content"))
 
   #Perform cqn-normalisation
   count_matrix = assays[[assay_name]]
   expression_cqn = cqn::cqn(counts = count_matrix,
-                            x = row_data$gene_gc_content,
+                            x = row_data$phenotype_gc_content,
                             lengths = row_data$gene_length, verbose = TRUE)
   cqn_matrix = expression_cqn$y + expression_cqn$offset
 
@@ -181,11 +163,11 @@ normaliseSE_tpm <- function(se, assay_name = "counts", fragment_length = 250){
   assays = SummarizedExperiment::assays(se)
 
   #Ensure that required columns are present
-  assertthat::assert_that(assertthat::has_name(row_data, "gene_length"))
+  assertthat::assert_that(assertthat::has_name(row_data, "phenotype_length"))
 
   #Perform tpm-normalisation
   count_matrix = assays[[assay_name]]
-  lengths = row_data$gene_length
+  lengths = row_data$phenotype_length
   scaling_factor = colSums((count_matrix*fragment_length)/lengths)
 
   tpm = t(t(count_matrix * fragment_length * 1e6)/scaling_factor)
