@@ -73,3 +73,17 @@ importVariantInformation <- function(path){
     dplyr::mutate(MAF = pmin(AC/AN, 1-(AC/AN)))
   return(snp_info)
 }
+
+#' Read and merge the TxRevise count matrices
+#'
+#' @param path Path to directory where TxRevise files located.
+#' @export
+importTxreviseCounts <- function(path){
+  txrevise_count_files = list.files(path, pattern = ".TPM.merged.txt$", full.names = T)
+  merged_counts <- tibble()
+  for (count_file_path in txrevise_count_files) {
+    count_file_df <- utils::read.csv(count_file_path, sep = '\t')
+    merged_counts <- rbind(merged_counts, count_file_df)
+  }
+  return(merged_counts)
+}
