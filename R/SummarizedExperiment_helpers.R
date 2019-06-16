@@ -76,23 +76,23 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   #Make dfs
   row_df = as.data.frame(row_data)
   rownames(row_df) = row_data$phenotype_id
-  
+
   col_df = as.data.frame(col_data)
   rownames(col_df) = col_data$sample_id
-  
+
   shared_samples <- intersect(col_df$sample_id, colnames(assay))
   col_df <- col_df[shared_samples,]
 
   assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% eQTLUtils::reformatPhenotypeId()
   rownames(assay) <- assay$phenotype_id
-  assay = assay[,shared_samples]  
-  
+  assay = assay[,shared_samples]
+
   #Make assay list
   assay = as.matrix(assay)
   assay_list = list()
   #Reorder columns and rows to match metadata
   assay_list[[assay_name]] = assay[rownames(row_df), rownames(col_df)]
-  
+
   #Make a summarizedExperiment object
   se = SummarizedExperiment::SummarizedExperiment(
     assays = assay_list,
@@ -285,18 +285,21 @@ normaliseSE_ratios <- function(se, assay_name = "tpms"){
   tx_map = row_data %>%
     as.data.frame() %>%
     dplyr::as_tibble() %>%
-    dplyr::transmute(transcript_id = phenotype_id, gene_id = quant_id)
+    dplyr::select(phenotype_id, quant_id)
 
   #Extract assays
   assay_list = SummarizedExperiment::assays(se)
   assay_matrix = assay_list[[assay_name]]
 
   #Calculate transcript ratios
-  transcript_ratios = calculateTranscriptRatios(assay_matrix, tx_map) %>%
+  transcript_ratios = calculateTranscriptUsage(assay_matrix, tx_map) %>%
     replaceNAsWithRowMeans()
 
+  #Reorder rows
+  reordered_ratios = transcript_ratios[row_data$phenotype_id,]
+
   #Update assays
-  assay_list[["usage"]] = transcript_ratios
+  assay_list[["usage"]] = reordered_ratios
 
   #Make ab update se object
   se = SummarizedExperiment::SummarizedExperiment(

@@ -68,32 +68,22 @@ quantileNormaliseRows <- function(matrix,...){
   t(quantileNormaliseMatrix(t(matrix), ...))
 }
 
-calculateTranscriptRatios <- function(expression_matrix, gene_transcript_map){
+calculateTranscriptUsage <- function(expression_matrix, phenotype_map){
 
   #Check that gene_transcript_map has the correct columns
-  assertthat::assert_that(assertthat::has_name(gene_transcript_map, "gene_id"))
-  assertthat::assert_that(assertthat::has_name(gene_transcript_map, "transcript_id"))
-  assertthat::assert_that(length(colnames(gene_transcript_map)) == 2)
+  assertthat::assert_that(assertthat::has_name(phenotype_map, "quant_id"))
+  assertthat::assert_that(assertthat::has_name(phenotype_map, "phenotype_id"))
+  assertthat::assert_that(length(colnames(phenotype_map)) == 2)
 
-  #Add gene ids to transcript expression matrix
-  tpm_df = dplyr::mutate(as.data.frame(expression_matrix), transcript_id = rownames(expression_matrix)) %>%
-    tbl_df() %>%
-    dplyr::left_join(gene_transcript_map, by = "transcript_id") %>%
-    dplyr::select(-transcript_id) %>%
-    dplyr::select(gene_id, everything())
+  #group phenotype_ids by quant_id
+  groups = dplyr::group_by(phenotype_map, quant_id) %>% tidyr::nest()
 
-  #Calculate total expression per gene
-  gene_total_tpms = purrrlyr::slice_rows(tpm_df, "gene_id") %>%
-    purrrlyr::by_slice(~colSums(.) %>%
-                      t() %>%
-                      as.data.frame(), .collate = "rows")
+  #Extract individual phenotypes
+  matrix_list = purrr::map(groups$data, ~expression_matrix[.$phenotype_id,,drop = FALSE])
 
-  #Make matrix of gene expression values for each transcript
-  tx_gene_expression = dplyr::left_join(gene_transcript_map, gene_total_tpms, by = "gene_id")
-  tx_gene_matrix = dplyr::select(tx_gene_expression, -gene_id, -transcript_id) %>% as.matrix()
-  rownames(tx_gene_matrix) = tx_gene_expression$transcript_id
+  #Divide by row sums
+  usage_list = purrr::map(matrix_list, ~t(t(.)/apply(.,2, sum)))
+  transcript_usage = do.call(rbind, usage_list)
 
-  #calculate TPM ratios and add them to the SummarizedExperiment
-  tpm_ratios = expression_matrix/tx_gene_matrix[rownames(expression_matrix),]
-  return(tpm_ratios)
+  return(transcript_usage)
 }
