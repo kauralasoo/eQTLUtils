@@ -7,9 +7,15 @@ Depends: R (>= 3.6.0)
 Imports: lumi (>= 2.36.0), 
     limma (>= 3.40.0), 
     dplyr,
-    SummarizedExperiment, cqn,
+    readr,
+    tidyr,
+    SummarizedExperiment, 
+    cqn,
     ggplot2,
-    htmlwidgets
+    plotly,
+    htmlwidgets,
+    assertthat,
+    GenomicRanges
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
