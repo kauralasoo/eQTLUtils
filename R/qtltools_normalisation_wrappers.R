@@ -21,7 +21,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
     #Normalise featureCounts data
 
     #Filter SE to keep correct chromosomes and QC-passed samples
-    se_filtered = filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
+    se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
                                              valid_gene_types = valid_gene_types,
                                              filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
@@ -62,7 +62,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
     } else if(quant_method == "txrevise"){
 
       #Filter SE to keep correct chromosomes and QC-passed samples
-      se_filtered = filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
+      se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
                                                valid_gene_types = valid_gene_types,
                                                filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 

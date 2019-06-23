@@ -135,7 +135,13 @@ mbvFindBestMatch <- function(mbv_df){
   return(best_row)
 }
 
-#Import MBV output files for all samples in a studt
+
+#' Import MBV output files for all samples in a studt
+#'
+#' @param mbv_dir directory where mbv output files are located
+#'
+#' @return List of the matrixes with mbv output values per sample
+#' @export
 mbvImportData <- function(mbv_dir, suffix = ".mbv_output.txt"){
 
   #List all files

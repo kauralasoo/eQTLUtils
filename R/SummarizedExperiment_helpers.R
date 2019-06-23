@@ -82,13 +82,13 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
 #' @export
 makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, assay_name = "counts", quant_method = "gene_counts"){
   #Make dfs
-  row_df = as.data.frame(row_data)
+  row_df = BiocGenerics::as.data.frame(row_data)
   rownames(row_df) = row_data$phenotype_id
 
-  col_df = as.data.frame(col_data)
+  col_df = BiocGenerics::as.data.frame(col_data)
   rownames(col_df) = col_data$sample_id
 
-  shared_samples <- intersect(col_df$sample_id, colnames(assay))
+  shared_samples <- BiocGenerics::intersect(col_df$sample_id, colnames(assay))
   col_df <- col_df[shared_samples,]
 
   assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% eQTLUtils::reformatPhenotypeId(quant_method = quant_method)
@@ -108,7 +108,7 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
       assay = assay[rowSums(assay) > 5,]   
     }
     
-    shared_phenotypes <- intersect(rownames(row_df), rownames(assay))
+    shared_phenotypes <- BiocGenerics::intersect(rownames(row_df), rownames(assay))
     assay = assay[shared_phenotypes,]  
     row_df = row_df[shared_phenotypes,]
   
@@ -132,7 +132,15 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
     rowData = row_df)
 }
 
-
+#' Filter a Summarized Experiment according to provided parameters
+#'
+#' @param se Summarized Experiment object to be filteres
+#' @param valid_chromosomes list (string vector) of valid gene chromosomes
+#' @param valid_gene_types list (string vector) of valid gene types
+#' @param filter_rna_qc Boolean value
+#' @param filter_genotype_qc Boolean value
+#' @author Kaur Alasoo
+#' @export
 filterSummarizedExperiment <- function(se, valid_chromosomes = NA, valid_gene_types = NA, filter_rna_qc = FALSE, filter_genotype_qc = FALSE){
 
   #Filter chromosomes
@@ -260,6 +268,12 @@ removeGeneVersion <- function(read_counts){
   return(read_counts)
 }
 
+#' Reformat phenotype IDs according to quantification method
+#'
+#' @param read_counts count matrix of any phenotype quantification.
+#' @param quant_method Quantification method. Can be gene_counts, leafcutter, txrevise, transcript_usage or exon_counts
+#' @author Nurlan Kerimov
+#' @export
 reformatPhenotypeId <- function(read_counts, quant_method = "gene_counts") {
   if (quant_method %in% c("gene_counts","transcript_usage")) {
     read_counts$phenotype_id = (dplyr::select(read_counts, phenotype_id) %>% tidyr::separate(phenotype_id, c("phenotype_id", "suffix"), sep = "\\."))$phenotype_id
@@ -307,7 +321,13 @@ subsetSEByColumnValue <- function(se, column, value){
   return(result)
 }
 
-
+#' normaliseSE_ratios
+#'
+#' @param se SummarizedExperiment object
+#' @param assay_name custom assay name for generated assay
+#'
+#' @return SummarizedExperiment object with additional assay
+#' @export
 normaliseSE_ratios <- function(se, assay_name = "tpms"){
 
   #Extract rowData and check for required columns
@@ -326,7 +346,7 @@ normaliseSE_ratios <- function(se, assay_name = "tpms"){
   assay_matrix = assay_list[[assay_name]]
 
   #Calculate transcript ratios
-  transcript_ratios = calculateTranscriptUsage(assay_matrix, tx_map) %>%
+  transcript_ratios = eQTLUtils::calculateTranscriptUsage(assay_matrix, tx_map) %>%
     replaceNAsWithRowMeans()
 
   #Reorder rows

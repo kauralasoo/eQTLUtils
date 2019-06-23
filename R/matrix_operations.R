@@ -29,6 +29,11 @@ zScoreNormalize <- function(matrix){
   return(matrix)
 }
 
+#' replaceNAsWithRowMeans
+#'
+#' @param matrix matrix
+#'
+#' @export
 replaceNAsWithRowMeans <- function(matrix){
   #replace with row means
   na_pos = which(is.na(matrix), arr.ind = TRUE)
@@ -68,6 +73,12 @@ quantileNormaliseRows <- function(matrix,...){
   t(quantileNormaliseMatrix(t(matrix), ...))
 }
 
+#' Calculate the transcript usage
+#'
+#' @param expression_matrix expression_matrix 
+#' @param phenotype_map phenotype_map 
+#'
+#' @export
 calculateTranscriptUsage <- function(expression_matrix, phenotype_map){
 
   #Check that gene_transcript_map has the correct columns
