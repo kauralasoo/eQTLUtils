@@ -71,7 +71,15 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
     rowData = row_df)
 }
 
-
+#' Make Summarized Experiment object from raw count matrix
+#'
+#' @param assay count matrix of any phenotype quantification.
+#' @param row_data phenotype metadata
+#' @param col_data sample metadata
+#' @param assay_name custom assay name to be created in SE. Default "counts"
+#' @param quant_method Quantification method. Can be gene_counts, leafcutter, txrevise, transcript_usage or exon_counts
+#' @author Nurlan Kerimov
+#' @export
 makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, assay_name = "counts", quant_method = "gene_counts"){
   #Make dfs
   row_df = as.data.frame(row_data)
