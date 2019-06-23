@@ -166,6 +166,12 @@ filterSummarizedExperiment <- function(se, valid_chromosomes = NA, valid_gene_ty
   return(se)
 }
 
+#' Normalises the assay of SE with cqn method
+#'
+#' @param se Summarized Experiment object to
+#' @param assay_name custom assay_name (default: counts)
+#' @author Kaur Alasoo
+#' @export
 normaliseSE_cqn <- function(se, assay_name = "counts"){
   require("cqn")
 
@@ -195,6 +201,13 @@ normaliseSE_cqn <- function(se, assay_name = "counts"){
     rowData = row_data)
 }
 
+#' Normalises the assay of SE with TPM method
+#'
+#' @param se Summarized Experiment object 
+#' @param assay_name custom assay_name (default: counts)
+#' @param fragment_length custom fragment_length (default: 250)
+#' @author Kaur Alasoo
+#' @export
 normaliseSE_tpm <- function(se, assay_name = "counts", fragment_length = 250){
 
   #Extract fields
@@ -236,7 +249,17 @@ filterSE_expressedGenes <- function(se, min_count = 1, min_fraction = 0.1, assay
   return(final_se)
 }
 
-
+#' Quantile normalise SummarizedExperiment by rows
+#'
+#' @param se SummarizedExperiment object
+#' @param assay_name Name of the assay to be processed in the se object
+#' @param n_pcs Number of desired principal components
+#' @param log_transform Boolean value
+#' @param column_prefix custom column_prefix
+#' @param feature_id default: sample_id
+#'
+#' @return SummarizedExperiment object with quantile-normalised data in the qnorm assay
+#' @export
 transformSE_PCA <- function(se, assay_name = "cqn", n_pcs = NULL, log_transform = FALSE, column_prefix = "", feature_id = "sample_id", ...){
   #Extract data
   matrix = SummarizedExperiment::assays(se)[[assay_name]]
