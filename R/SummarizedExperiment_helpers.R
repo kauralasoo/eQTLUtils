@@ -91,10 +91,10 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   shared_samples <- BiocGenerics::intersect(col_df$sample_id, colnames(assay))
   col_df <- col_df[shared_samples,]
 
-  assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% eQTLUtils::reformatPhenotypeId(quant_method = quant_method)
+  assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% reformatPhenotypeId(quant_method = quant_method)
   rownames(assay) <- assay$phenotype_id
-  assay = assay[,shared_samples]  
-  
+  assay = assay[,shared_samples]
+
   if (quant_method %in% c("exon_counts","transcript_usage", "txrevise")) {
     # remove invalid gene types from assay
     valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
@@ -102,23 +102,23 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
                          "3prime_overlapping_ncrna","known_ncrna", "processed_transcript",
                          "antisense","sense_intronic","sense_overlapping")
     row_df = row_df[row_df$gene_type %in% valid_gene_types,]
-    
+
     if (quant_method == "exon_counts") {
       # remove the exons which only less than 5 samples have overlapped read(s)
-      assay = assay[rowSums(assay) > 5,]   
+      assay = assay[rowSums(assay) > 5,]
     }
-    
+
     shared_phenotypes <- BiocGenerics::intersect(rownames(row_df), rownames(assay))
-    assay = assay[shared_phenotypes,]  
+    assay = assay[shared_phenotypes,]
     row_df = row_df[shared_phenotypes,]
-  
+
     if (quant_method %in% c("transcript_usage","txrevise")) {
       assay_name <- "tpms"
     }
   }
-  
+
   dummy <- assertthat::assert_that(all(rownames(assay) %in% row_df$phenotype_id), msg = "Some phenotypes in assay missing metadata information")
-  
+
   #Make assay list
   assay = as.matrix(assay)
   assay_list = list()
@@ -203,7 +203,7 @@ normaliseSE_cqn <- function(se, assay_name = "counts"){
 
 #' Normalises the assay of SE with TPM method
 #'
-#' @param se Summarized Experiment object 
+#' @param se Summarized Experiment object
 #' @param assay_name custom assay_name (default: counts)
 #' @param fragment_length custom fragment_length (default: 250)
 #' @author Kaur Alasoo
@@ -369,7 +369,7 @@ normaliseSE_ratios <- function(se, assay_name = "tpms"){
   assay_matrix = assay_list[[assay_name]]
 
   #Calculate transcript ratios
-  transcript_ratios = eQTLUtils::calculateTranscriptUsage(assay_matrix, tx_map) %>%
+  transcript_ratios = calculateTranscriptUsage(assay_matrix, tx_map) %>%
     replaceNAsWithRowMeans()
 
   #Reorder rows
