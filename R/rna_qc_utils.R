@@ -339,7 +339,7 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", export_output = FA
   pca_res = calculatePCAMatrix(study_data_se, condition, return_pca_object = TRUE)
   study_name <- study_data_se$study %>% unique()
 
-  PCA.plot <- ggplot2::ggplot(pca_res$pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) +
+  PCA.plot <- ggplot2::ggplot(pca_res$pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = qtl_group, shape = study, label = sample_id)) +
     ggplot2::geom_point() +
     ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
     ggplot2::labs(x=paste0("PC 1 - (", round(pca_res$var_exp[1]*100, digits = 1),"% var. explained)"),
@@ -394,7 +394,7 @@ plotPCAAnalysis <- function(study_data_se, condition = "all", export_output = FA
 plotPCAFromMatrix <- function(pca_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
   study_name <- unique(pca_matrix$study)[1]
 
-  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = cell_type, shape = study, label = sample_id)) +
+  PCA.plot <- ggplot2::ggplot(pca_matrix, ggplot2::aes(x = PC1, y = PC2, color = qtl_group, shape = study, label = sample_id)) +
     ggplot2::geom_point() +
     ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
     ggplot2::labs(x="PC 1", y="PC 2", title = paste0(study_name, " PCA - TPM normalized, log2 | Sample Size: ", nrow(pca_matrix))) +
