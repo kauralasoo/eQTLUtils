@@ -203,7 +203,7 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", export_output = FA
   mds_matrix = calculateMDSMatrix(study_data_se, condition)
   study_name <- study_data_se$study %>% unique()
 
-  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) +
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = qtl_group, shape = study, label = sample_id)) +
     ggplot2::geom_point() +
     ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
     ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2",
@@ -256,7 +256,7 @@ plotMDSAnalysis <- function(study_data_se, condition = "all", export_output = FA
 plotMDSFromMatrix <- function(mds_matrix, export_output = FALSE, html_output=FALSE, output_dir="./"){
   study_name <- unique(mds_matrix$study)[1]
 
-  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = cell_type, shape = study, label = sample_id)) +
+  mds_plot = ggplot2::ggplot(mds_matrix, ggplot2::aes(x = V1, y = V2, color = qtl_group, shape = study, label = sample_id)) +
     ggplot2::geom_point() +
     ggplot2::scale_shape_manual(values=c(20,17,18,11,14,25,8,seq(0,7))) +
     ggplot2::labs(x="MDS Coordinate 1", y="MDS Coordinate 2",
