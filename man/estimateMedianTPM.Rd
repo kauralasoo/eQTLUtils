@@ -4,7 +4,8 @@
 \alias{estimateMedianTPM}
 \title{Estimate median TPM for each gene in each sample group of a SummarizedExperiment object.}
 \usage{
-estimateMedianTPM(se, subset_by = "qtl_group", assay_name = "counts")
+estimateMedianTPM(se, subset_by = "qtl_group", assay_name = "counts",
+  prob = 0.5)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
@@ -12,10 +13,12 @@ estimateMedianTPM(se, subset_by = "qtl_group", assay_name = "counts")
 \item{subset_by}{Name of the column used for subsetting the data.}
 
 \item{assay_name}{Name of the assay used for TPM normalisation and calculation of median}
+
+\item{prob}{Specifies which quantile of the dataset to calculate. Default is prob = 0.5 (median)}
 }
 \value{
 data frame of media tpm values per gene and sample group.
 }
 \description{
-Sample groups are defined accroding to the subset_by column of the colData data frame.
+Sample groups are defined accroding to the subset_by column of the colData data frame. The prob parmeter can be modified to estimate anu other quantile of the distribution.
 }
