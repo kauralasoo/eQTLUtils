@@ -1,3 +1,9 @@
+#' Import variant information from GDS file
+#'
+#' @param gdsfile Path to the genotype file in GDS format.
+#'
+#' @return data frame with variant information
+#' @export
 importVariantInformationFromGDS <- function(gdsfile){
 
   #Import individual columns
@@ -13,6 +19,14 @@ importVariantInformationFromGDS <- function(gdsfile){
   return(snp_df)
 }
 
+#' Extract genotypes of a single genetic variant from the GDS file
+#'
+#' @param variant_id Id of the genetic variant
+#' @param variant_information Variant infromation constructed by importVariantInformationFromGDS
+#' @param gdsfile Path to the GDS file
+#'
+#' @return data frame with the genotypes
+#' @export
 extractVariantGenotypeFromGDS <- function(variant_id, variant_information, gdsfile){
   assertthat::assert_that(length(variant_id) == 1)
 
@@ -28,6 +42,16 @@ extractVariantGenotypeFromGDS <- function(variant_id, variant_information, gdsfi
   return(genotype_df)
 }
 
+#' Extract a genotype matrix corresponding to a specific genomic region
+#'
+#' @param chr Chromosome of the region
+#' @param start Start coordinate of the region
+#' @param end End coordinate of the reion
+#' @param variant_information Variant infromation constructed by importVariantInformationFromGDS
+#' @param gdsfile Path to the GDS file
+#'
+#' @return
+#' @export
 extractGenotypeMatrixFromGDS <- function(chr, start, end, variant_information, gdsfile){
 
   #Extract variant ids from variant infromation
