@@ -362,6 +362,8 @@ normaliseSE_ratios <- function(se, assay_name = "tpms"){
   row_data = SummarizedExperiment::rowData(se)
   assertthat::assert_that(assertthat::has_name(row_data, "phenotype_id"))
   assertthat::assert_that(assertthat::has_name(row_data, "quant_id"))
+  assertthat::assert_that(!is.factor(row_data$phenotype_id))
+
 
   #Extract metadata
   tx_map = row_data %>%
