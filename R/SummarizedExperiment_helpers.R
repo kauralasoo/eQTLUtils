@@ -57,6 +57,11 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
   col_df = as.data.frame(col_data)
   rownames(col_df) = col_data$sample_id
 
+  #Keep only overlapping samples
+  shared_samples <- BiocGenerics::intersect(col_df$sample_id, colnames(assay))
+  col_df <- col_df[shared_samples,]
+  assay = assay[,shared_samples]
+
   #Make assay list
   assay = as.matrix(assay)
   assay_list = list()
