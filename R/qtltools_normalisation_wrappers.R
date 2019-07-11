@@ -1,7 +1,7 @@
 #' Normalise phenotype SummarisedExperiment object for QTL mapping with QTLtools
 #'
 #' @param se SummarizedExperiment object used for QTL mapping
-#' @param quant_method Quantification method used to generate the data. Valid options are: featureCounts, array, LeafCutter
+#' @param quant_method Quantification method used to generate the data. Valid options are: featureCounts, array, leafcutter
 #'
 #' @return Normalised SummarizedExperiment object
 #' @export
@@ -42,7 +42,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
     se_norm = eQTLUtils::array_normaliseSE(se_filtered, norm_method = "quantile", assay_name = "exprs",
                                            log_transform = TRUE, adjust_batch = TRUE, filter_quality = TRUE)
 
-    } else if(quant_method == "LeafCutter"){
+    } else if(quant_method == "leafcutter"){
       #Normalise LeafCutter exon exicision count
 
       #Keep events that did not map to any gene
@@ -50,7 +50,6 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
 
       #Filter se to keep correct chromosomes and gene biotypes
       se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
-                                                          valid_gene_types = valid_gene_types,
                                                           filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
       message("Calculating ratios...")

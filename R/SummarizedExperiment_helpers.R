@@ -383,7 +383,7 @@ normaliseSE_ratios <- function(se, assay_name = "tpms"){
   #Update assays
   assay_list[["usage"]] = reordered_ratios
 
-  #Make ab update se object
+  #Make an updated se object
   se = SummarizedExperiment::SummarizedExperiment(
     assays = assay_list,
     colData = SummarizedExperiment::colData(se),
