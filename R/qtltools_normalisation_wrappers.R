@@ -50,6 +50,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
 
       #Filter se to keep correct chromosomes and gene biotypes
       se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
+                                                          valid_gene_types = valid_gene_types,
                                                           filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
 
       message("Calculating ratios...")
