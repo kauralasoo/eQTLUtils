@@ -17,6 +17,9 @@ extractGenotypeMatrixFromGDS(chr, start, end, variant_information, gdsfile)
 
 \item{gdsfile}{Path to the GDS file}
 }
+\value{
+genotype matrix
+}
 \description{
 Extract a genotype matrix corresponding to a specific genomic region
 }

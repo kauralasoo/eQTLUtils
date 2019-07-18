@@ -10,7 +10,7 @@ qtltoolsPrepareSE(se, quant_method, filter_rna_qc = TRUE,
 \arguments{
 \item{se}{SummarizedExperiment object used for QTL mapping}
 
-\item{quant_method}{Quantification method used to generate the data. Valid options are: featureCounts, array, LeafCutter}
+\item{quant_method}{Quantification method used to generate the data. Valid options are: featureCounts, array, leafcutter}
 }
 \value{
 Normalised SummarizedExperiment object

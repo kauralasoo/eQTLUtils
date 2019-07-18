@@ -50,7 +50,7 @@ extractVariantGenotypeFromGDS <- function(variant_id, variant_information, gdsfi
 #' @param variant_information Variant infromation constructed by importVariantInformationFromGDS
 #' @param gdsfile Path to the GDS file
 #'
-#' @return
+#' @return genotype matrix
 #' @export
 extractGenotypeMatrixFromGDS <- function(chr, start, end, variant_information, gdsfile){
 
