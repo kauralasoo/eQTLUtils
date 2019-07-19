@@ -4,3 +4,4 @@ LABEL authors="Kaur Alasoo" \
 
 RUN R -e "BiocManager::install(c('BiocCheck','SummarizedExperiment','lumi', 'limma', 'dplyr','cqn','ggplot2','htmlwidgets', 'tidyr','assertthat','devtools','GenomicRanges','readr', 'GDSArray'))"
 RUN R -e "devtools::install_github('kauralasoo/eQTLUtils')"
+

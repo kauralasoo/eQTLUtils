@@ -1,5 +1,9 @@
 ### Build the Docker container
-sudo docker build -t kauralasoo/eqtlutils .
+sudo docker build -t kauralasoo/eqtlutils:<latest_git_commit_hash> .
+
+### To get the hash of the latest git commit, run:
+# https://blog.container-solutions.com/tagging-docker-images-the-right-way
+git log -1 --pretty=%H
 
 ### Push to DockerHub
 docker push kauralasoo/eqtlutils
