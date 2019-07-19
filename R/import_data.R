@@ -1,7 +1,7 @@
 #' A general function to quickly import tabix indexed tab-separated files into data_frame
 #'
 #' @param tabix_file Path to tabix-indexed text file
-#' @param param A instance of GRanges, RangedData, or RangesList
+#' @param param An instance of GRanges, RangedData, or RangesList
 #' provide the sequence names and regions to be parsed. Passed onto Rsamtools::scanTabix()
 #' @param ... Additional parameters to be passed on to readr::read_delim()
 #'
@@ -30,7 +30,13 @@ scanTabixDataFrame <- function(tabix_file, param, ...){
 }
 
 
-#Import transcript metadata from biomart web export
+#' Import transcript metadata from biomart web export
+#'
+#' @param biomart_path Path to the biomart download text file
+#' @param col_types Column types of the biomart download file (for readr)
+#'
+#' @return tibble containing transcript metadata
+#' @export
 importBiomartMetadata <- function(biomart_path, col_types = "ccccccciciiciiiiccccccccidccccii"){
   transcript_meta = readr::read_tsv(biomart_path, col_types = col_types)
   col_df = dplyr::data_frame(column_name = c('Gene stable ID', 'Transcript stable ID', 'Chromosome/scaffold name', 'Gene start (bp)', 'Gene end (bp)', 'Strand', 'Transcript start (bp)', 'Transcript end (bp)', 'Transcription start site (TSS)', 'Transcript length (including UTRs and CDS)', 'Transcript support level (TSL)', 'APPRIS annotation', 'GENCODE basic annotation', 'Gene name', 'Transcript name', 'Transcript count', 'Transcript type', 'Gene type', 'Gene % GC content', 'Version (gene)', 'Version (transcript)'),

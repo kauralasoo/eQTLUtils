@@ -9,7 +9,7 @@ scanTabixDataFrame(tabix_file, param, ...)
 \arguments{
 \item{tabix_file}{Path to tabix-indexed text file}
 
-\item{param}{A instance of GRanges, RangedData, or RangesList
+\item{param}{An instance of GRanges, RangedData, or RangesList
 provide the sequence names and regions to be parsed. Passed onto Rsamtools::scanTabix()}
 
 \item{...}{Additional parameters to be passed on to readr::read_delim()}
