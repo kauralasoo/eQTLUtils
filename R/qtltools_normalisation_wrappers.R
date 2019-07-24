@@ -8,6 +8,10 @@
 qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_genotype_qc = TRUE){
   require("cqn")
 
+  #Check for valid quant_methods
+  valid_quant_methods = c("gene_counts", "exon_counts","HumanHT-12_V4", "leafcutter", "txrevise", "transcript_usage")
+  assertthat::assert_that(quant_method %in% valid_quant_methods, msg = "The specified quant_method is not valid.")
+
   #Specify valid chromsomes and valid gene types
   valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
                        "IG_V_gene", "TR_C_gene","TR_D_gene","TR_J_gene", "TR_V_gene",
@@ -17,7 +21,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
                         "2","20","21","22","3","4","5","6","7","8","9")
 
   #Use different normalisation strategy for each quantification method
-  if(quant_method == "featureCounts"){
+  if(quant_method %in% c("exon_counts", "gene_counts")){
     #Normalise featureCounts data
 
     #Filter SE to keep correct chromosomes and QC-passed samples
@@ -28,16 +32,18 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
     #Normalise and make QTLtools matrix
     se_norm = normaliseSE_cqn(se_filtered, assay_name = "counts")
 
-    } else if(quant_method == "array"){
-    #Filter SE to keep correct chromosomes and QC-passed samples
-    message(" ## Filterin out invalid chromosomes, RNA_QC failed samples and genotype_QC failed samples ")
-    se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
-                                                            filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
+    } else if(quant_method == "HumanHT-12_V4"){
 
-    #Normalize and regress out batch effects
-    message(" ## Normalizing and regressing out the batch effects")
-    se_norm = eQTLUtils::array_normaliseSE(se_filtered, norm_method = "quantile", assay_name = "exprs",
-                                           log_transform = TRUE, adjust_batch = TRUE, filter_quality = TRUE)
+      #Filter SE to keep correct chromosomes and QC-passed samples
+      message(" ## Filtering out invalid chromosomes, RNA_QC failed samples and genotype_QC failed samples ")
+      se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,
+                                                          valid_gene_types = valid_gene_types,
+                                                          filter_rna_qc = filter_rna_qc, filter_genotype_qc = filter_genotype_qc)
+
+      #Normalize and regress out batch effects
+      message(" ## Normalizing and regressing out the batch effects")
+      se_norm = eQTLUtils::array_normaliseSE(se_filtered, norm_method = "quantile", assay_name = "exprs",
+                                           log_transform = TRUE, adjust_batch = TRUE)
 
     } else if(quant_method == "leafcutter"){
       #Normalise LeafCutter exon exicision count
@@ -56,7 +62,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
       message("Performing inverse normal transformation...")
       se_norm = eQTLUtils::normaliseSE_quantile(se_ratios, assay_name = "usage")
 
-    } else if(quant_method == "txrevise"){
+    } else if(quant_method %in% c("txrevise", "transcript_usage")){
 
       #Filter SE to keep correct chromosomes and QC-passed samples
       se_filtered = eQTLUtils::filterSummarizedExperiment(se, valid_chromosomes = valid_chromosomes,

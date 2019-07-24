@@ -100,28 +100,28 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   rownames(assay) <- assay$phenotype_id
   assay = assay[,shared_samples]
 
-  if (quant_method %in% c("exon_counts","transcript_usage", "txrevise")) {
-    # remove invalid gene types from assay
-    valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
-                         "IG_V_gene", "TR_C_gene","TR_D_gene","TR_J_gene", "TR_V_gene",
-                         "3prime_overlapping_ncrna","known_ncrna", "processed_transcript",
-                         "antisense","sense_intronic","sense_overlapping")
-    row_df = row_df[row_df$gene_type %in% valid_gene_types,]
+  if (quant_method %in% c("exon_counts","transcript_usage", "txrevise", "HumanHT-12_V4")) {
 
     if (quant_method == "exon_counts") {
       # remove the exons which only less than 5 samples have overlapped read(s)
       assay = assay[rowSums(assay) > 5,]
     }
 
+    if (quant_method %in% c("transcript_usage","txrevise")) {
+      assay_name <- "tpms"
+    }
+
+    if (quant_method == "HumanHT-12_V4") {
+      assay_name <- "exprs"
+    }
+
     shared_phenotypes <- BiocGenerics::intersect(rownames(row_df), rownames(assay))
     assay = assay[shared_phenotypes,]
     row_df = row_df[shared_phenotypes,]
 
-    if (quant_method %in% c("transcript_usage","txrevise")) {
-      assay_name <- "tpms"
-    }
   }
 
+  #Check that all phenotypes have metadata
   dummy <- assertthat::assert_that(all(rownames(assay) %in% row_df$phenotype_id), msg = "Some phenotypes in assay missing metadata information")
 
   #Make assay list
