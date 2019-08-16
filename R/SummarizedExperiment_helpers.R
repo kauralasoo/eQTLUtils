@@ -161,11 +161,13 @@ filterSummarizedExperiment <- function(se, valid_chromosomes = NA, valid_gene_ty
 
   #Filter RNA QC
   if(filter_rna_qc){
+    assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "rna_qc_passed"))
     se = se[,se$rna_qc_passed]
   }
 
   #Filter genotype QC
   if(filter_genotype_qc){
+    assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "genotype_qc_passed"))
     se = se[,se$genotype_qc_passed]
   }
   return(se)
