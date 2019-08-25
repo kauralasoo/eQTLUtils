@@ -447,7 +447,7 @@ calculatePCAMatrix <- function(study_data_se, condition = "all", return_pca_obje
                         "2","20","21","22","3","4","5","6","7","8","9")
 
   # choose only valid gene types, valid chromosomes and TPM normalise
-  processed_se = eQTLUtils::filterSummarizedExperiment(se,
+  processed_se = eQTLUtils::filterSummarizedExperiment(study_data_se,
                                                        valid_chromosomes = valid_chromosomes,
                                                        valid_gene_types = valid_gene_types) %>% eQTLUtils::normaliseSE_tpm()
   processed_se = processed_se[apply(SummarizedExperiment::assays(processed_se)$tpms, 1, median) > 1, ]
