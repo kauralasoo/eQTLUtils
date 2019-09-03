@@ -237,13 +237,22 @@ array_PlotSexQC <- function(study_data, assay_name = "exprs", html_output=FALSE,
 #' @author Nurlan Kerimov, Liis Kolberg
 #' @export
 #'
-array_CalculateSexQCDataFrame <- function(study_data, assay_name){
+array_CalculateSexQCDataFrame <- function(study_data, assay_name, filterByCondition = TRUE, normalise_array = FALSE){
   # get the rowData of SummarizedExperiment
   study_rowdata <- SummarizedExperiment::rowData(study_data) %>% SummarizedExperiment::as.data.frame()
 
-  # keep only naive samples
-  study_data_filt = study_data[,study_data$condition=="naive" & study_data$RNA_QC_passed==TRUE & study_data$cell_type %in% c("monocytes", "neutrophils", "T-cell", "B-cell", "platelet")]
-
+  if(filterByCondition) {
+    # keep only naive samples
+    study_data_filt = study_data[,study_data$condition=="naive" & study_data$RNA_QC_passed==TRUE & study_data$cell_type %in% c("monocytes", "neutrophils", "T-cell", "B-cell", "platelet")]
+  } else {
+    study_data_filt <-study_data
+  }
+  
+  if (normalise_array) {
+    study_data_filt <- eQTLUtils::array_normaliseSE(study_data_filt)
+    assay_name = "norm_exprs"
+  } 
+  
   # get the Y chromosome genes only from rowdata
   study_Y_chrom_data <- dplyr::filter(study_rowdata, chromosome=="Y", gene_type=="protein_coding") %>% dplyr::arrange(gene_start)
 
