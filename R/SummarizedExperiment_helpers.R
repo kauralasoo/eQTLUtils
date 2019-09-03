@@ -97,10 +97,12 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   col_df <- col_df[shared_samples,]
 
   assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% reformatPhenotypeId(quant_method = quant_method)
+  assay = BiocGenerics::as.data.frame(assay)
   rownames(assay) <- assay$phenotype_id
   assay = assay[,shared_samples]
+  print(assay[1:10,1:10])
 
-  if (quant_method %in% c("exon_counts","transcript_usage", "txrevise", "HumanHT-12_V4")) {
+  if (quant_method %in% c("gene_counts","exon_counts","transcript_usage", "txrevise", "HumanHT-12_V4")) {
 
     if (quant_method == "exon_counts") {
       # remove the exons which only less than 5 samples have overlapped read(s)
@@ -474,7 +476,7 @@ checkCisVariants <- function(se,
 extractPhentypeFromSE <- function(phenotype_id, se, assay){
 
   #extract single phenotype
-  pheno_mat = assays(se)[[assay]]
+  pheno_mat = SummarizedExperiment::assays(se)[[assay]]
   pheno_row = pheno_mat[phenotype_id,]
   pheno_df = dplyr::data_frame(phenotype_id = phenotype_id, sample_id = names(pheno_row), phenotype_value = pheno_row)
 
