@@ -473,6 +473,16 @@ checkCisVariants <- function(se,
   return(se)
 }
 
+#' Extract a single phenotype from a SummarizedExperiment object.
+#'
+#' Produces a single data frame where phenotype values have been joined into a single data frame with sample metadata.
+#'
+#' @param phenotype_id Id of the phenotype to be extracted
+#' @param se SummarizedExperiment object
+#' @param assay Name of the assay in the SummarizedExperiment object.
+#'
+#' @return Data frame with phenotype values and sample metadata.
+#' @export
 extractPhentypeFromSE <- function(phenotype_id, se, assay){
 
   #extract single phenotype

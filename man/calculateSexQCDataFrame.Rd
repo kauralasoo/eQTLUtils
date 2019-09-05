@@ -4,7 +4,7 @@
 \alias{calculateSexQCDataFrame}
 \title{Generate Sex dependent QC DataFrame.}
 \usage{
-calculateSexQCDataFrame(study_data)
+calculateSexQCDataFrame(study_data, is_micro_array = FALSE)
 }
 \arguments{
 \item{study_data}{SummarizedExperiment file to be analysed}
