@@ -90,7 +90,7 @@ importTxreviseCounts <- function(path){
   merged_counts <- dplyr::tibble()
   for (count_file_path in txrevise_count_files) {
     message(count_file_path)
-    count_file_df <- utils::read.csv(count_file_path, sep = '\t')
+    count_file_df <- utils::read.csv(count_file_path, sep = '\t', check.names = FALSE)
     merged_counts <- rbind(merged_counts, count_file_df)
   }
   return(merged_counts)
