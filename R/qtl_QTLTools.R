@@ -40,7 +40,6 @@ importQTLtoolsTable <- function(file_path){
     dplyr::mutate(p_bonferroni = p_nominal*group_size*n_cis_snps) %>%
     dplyr::mutate(p_bonferroni = pmin(p_bonferroni,1)) %>%
     dplyr::mutate(p_fdr = p.adjust(p_beta, method = "fdr")) %>%
-    dplyr::mutate(qvalue = qvalue::qvalue(p_beta)$qvalues) %>%
     dplyr::arrange(p_fdr)
   return(table)
 }
@@ -124,7 +123,7 @@ mbvFindBestMatch <- function(mbv_df){
   other_het = dplyr::arrange(res, -het_consistent_frac) %>% dplyr::filter(dplyr::row_number() > 1)
   best_row = dplyr::mutate(best_het, het_min_dist = min(best_het$het_consistent_frac - other_het$het_consistent_frac),
                            hom_min_dist = min(best_het$hom_consistent_frac - other_het$hom_consistent_frac),
-                           distance = sqrt(het_min_dist^2 + hom_min_dist^2)) 
+                           distance = sqrt(het_min_dist^2 + hom_min_dist^2))
 
   #Compare against best hom
   best_hom = dplyr::arrange(res, -hom_consistent_frac) %>% dplyr::filter(dplyr::row_number() == 1)
