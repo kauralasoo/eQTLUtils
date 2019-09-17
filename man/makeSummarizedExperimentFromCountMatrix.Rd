@@ -5,7 +5,8 @@
 \title{Make Summarized Experiment object from raw count matrix}
 \usage{
 makeSummarizedExperimentFromCountMatrix(assay, row_data, col_data,
-  assay_name = "counts", quant_method = "gene_counts")
+  assay_name = "counts", quant_method = "gene_counts",
+  reformat = TRUE)
 }
 \arguments{
 \item{assay}{count matrix of any phenotype quantification.}
@@ -17,6 +18,8 @@ makeSummarizedExperimentFromCountMatrix(assay, row_data, col_data,
 \item{assay_name}{custom assay name to be created in SE. Default "counts"}
 
 \item{quant_method}{Quantification method. Can be gene_counts, leafcutter, txrevise, transcript_usage or exon_counts}
+
+\item{reformat}{Reformat phenotype ids. Default TRUE.}
 }
 \description{
 Make Summarized Experiment object from raw count matrix

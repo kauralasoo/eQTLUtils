@@ -83,9 +83,11 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
 #' @param col_data sample metadata
 #' @param assay_name custom assay name to be created in SE. Default "counts"
 #' @param quant_method Quantification method. Can be gene_counts, leafcutter, txrevise, transcript_usage or exon_counts
+#' @param reformat Reformat phenotype ids. Default TRUE.
 #' @author Nurlan Kerimov
 #' @export
-makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, assay_name = "counts", quant_method = "gene_counts"){
+makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, assay_name = "counts",
+                                                    quant_method = "gene_counts", reformat = TRUE){
   #Make dfs
   row_df = BiocGenerics::as.data.frame(row_data)
   rownames(row_df) = row_data$phenotype_id
@@ -96,7 +98,13 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   shared_samples <- BiocGenerics::intersect(col_df$sample_id, colnames(assay))
   col_df <- col_df[shared_samples,]
 
-  assay = assay %>% dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>% reformatPhenotypeId(quant_method = quant_method)
+  #Reformat phenotype ids
+  if (reformat){
+    assay = assay %>%
+      dplyr::filter(!(phenotype_id %like% "PAR_Y")) %>%
+      reformatPhenotypeId(quant_method = quant_method)
+  }
+
   assay = BiocGenerics::as.data.frame(assay)
   rownames(assay) <- assay$phenotype_id
   assay = assay[,shared_samples]
