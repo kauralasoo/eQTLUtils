@@ -2,7 +2,7 @@
 % Please edit documentation in R/SummarizedExperiment_helpers.R
 \name{makeSummarizedExperimentFromCountMatrix}
 \alias{makeSummarizedExperimentFromCountMatrix}
-\title{Make Summarized Experiment object from raw count matrix}
+\title{Make Summarized Experiment object from raw or normalised count matrix}
 \usage{
 makeSummarizedExperimentFromCountMatrix(assay, row_data, col_data,
   assay_name = "counts", quant_method = "gene_counts",
@@ -22,7 +22,7 @@ makeSummarizedExperimentFromCountMatrix(assay, row_data, col_data,
 \item{reformat}{Reformat phenotype ids. Default TRUE.}
 }
 \description{
-Make Summarized Experiment object from raw count matrix
+Make Summarized Experiment object from raw or normalised count matrix
 }
 \author{
 Nurlan Kerimov

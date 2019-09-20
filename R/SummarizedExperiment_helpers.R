@@ -76,7 +76,7 @@ makeSummarizedExperiment <- function(assay, row_data, col_data, assay_name){
     rowData = row_df)
 }
 
-#' Make Summarized Experiment object from raw count matrix
+#' Make Summarized Experiment object from raw or normalised count matrix
 #'
 #' @param assay count matrix of any phenotype quantification.
 #' @param row_data phenotype metadata
