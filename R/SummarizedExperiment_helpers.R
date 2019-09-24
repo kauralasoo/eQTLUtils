@@ -108,7 +108,6 @@ makeSummarizedExperimentFromCountMatrix <- function(assay, row_data, col_data, a
   assay = BiocGenerics::as.data.frame(assay)
   rownames(assay) <- assay$phenotype_id
   assay = assay[,shared_samples]
-  print(assay[1:10,1:10])
 
   if (quant_method %in% c("gene_counts","exon_counts","transcript_usage", "txrevise", "HumanHT-12_V4")) {
 
