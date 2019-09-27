@@ -44,6 +44,17 @@ importQTLtoolsTable <- function(file_path){
   return(table)
 }
 
+importQTLtoolsNominalTable <- function(file_path){
+  col_names = c("phenotype_id", "pheno_chr", "pheno_start", "pheno_end", "strand", "n_cis_snps", "distance", "snp_id", "snp_chr", "snp_start", "snp_end", "p_nominal", "beta", "is_lead")
+  col_types = "cciiciicciiddi"
+  table = readr::read_tsv(file_path, col_names = col_names, col_types = col_types) %>%
+    dplyr::group_by(phenotype_id) %>%
+    dplyr::mutate(p_bonferroni = p.adjust(p_nominal, n = n_cis_snps)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(p_fdr = p.adjust(p_bonferroni, method = "fdr"))
+  return(table)
+}
+
 #' Fetch particular genes from tabix indexed QTLtools output file.
 #'
 #' @param gene_ranges GRanges object with coordinates of the cis regions around genes.
