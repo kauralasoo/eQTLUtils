@@ -80,8 +80,8 @@ assign_populations <- function(distance_matrix, abs_threshold = 0.02, rel_thresh
 #' @author Nurlan Kerimov
 #' @export
 reassign_populations <- function(distance_matrix, abs_threshold, rel_threshold){
-  alasoo_distances <- alasoo_distances[c(2:5)] %>% t() %>% as.data.frame() %>% setNames(alasoo_distances$genotype_id)
-  alasoo_distances <- cbind(superpopulation_code = rownames(alasoo_distances), alasoo_distances)
-  assigned_new_pop <- assign_populations(alasoo_distances, abs_threshold = 0.01, rel_threshold = 3)
+  distance_matrix <- distance_matrix[c(2:5)] %>% t() %>% as.data.frame() %>% setNames(distance_matrix$genotype_id)
+  distance_matrix <- cbind(superpopulation_code = rownames(distance_matrix), distance_matrix)
+  assigned_new_pop <- assign_populations(distance_matrix, abs_threshold = 0.01, rel_threshold = 3)
   return(assigned_new_pop)
 }
