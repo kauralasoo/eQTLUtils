@@ -5,7 +5,7 @@
 #'
 #' @return Normalised SummarizedExperiment object
 #' @export
-qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_genotype_qc = TRUE){
+qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_genotype_qc = TRUE, keep_XY = FALSE){
   require("cqn")
 
   #Check for valid quant_methods
@@ -19,6 +19,9 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
                        "antisense","sense_intronic","sense_overlapping")
   valid_chromosomes = c("1","10","11","12","13","14","15","16","17","18","19",
                         "2","20","21","22","3","4","5","6","7","8","9")
+  if(keep_XY){
+    valid_chromosomes = c(valid_chromosomes, c("X","Y"))
+  }
 
   #Use different normalisation strategy for each quantification method
   if(quant_method %in% c("exon_counts", "gene_counts")){
