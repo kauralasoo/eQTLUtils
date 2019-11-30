@@ -304,7 +304,7 @@ plotMDSFromMatrix <- function(mds_matrix, export_output = FALSE, html_output=FAL
 #' @export
 calculateMDSMatrix <- function(study_data_se, condition = "all"){
   if (condition!="all") {
-    study_data_se = study_data_se[,study_data_se$condition == condition]
+    study_data_se = study_data_se[,study_data_se$condition %in% condition]
   }
 
   valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
@@ -442,7 +442,7 @@ plotPCAFromMatrix <- function(pca_matrix, export_output = FALSE, html_output=FAL
 #' @export
 calculatePCAMatrix <- function(study_data_se, condition = "all", return_pca_object = FALSE){
   if (condition!="all") {
-    study_data_se = study_data_se[,study_data_se$condition == condition]
+    study_data_se = study_data_se[,study_data_se$condition %in% condition]
   }
 
   valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
