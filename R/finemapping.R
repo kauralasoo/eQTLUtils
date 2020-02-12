@@ -33,6 +33,18 @@ importSusieCredibleSets <- function(cs_folder_path){
   #Import files
   cs_df = purrr::map_df(path_list, ~readr::read_tsv(.), .id = "file_name") %>%
     tidyr::separate(file_name, c("study","qtl_group", "quant_method", "chunk", "suffix"), sep = "\\.") %>%
-    dplyr::select(-chunk, -suffix)
+    dplyr::select(-chunk, -suffix) %>%
+    dplyr::mutate(cs_uid = paste(study, qtl_group, phenotype_id, cs_id, sep = "_")) %>%
+    dplyr::group_by(cs_uid) %>%
+    dplyr::mutate(cs_size = dplyr::n()) %>%
+    dplyr::mutate(max_z = max(abs(z))) %>%
+    dplyr::ungroup()
   return(cs_df)
+}
+
+#Convert cs data frame to a list of credible set variants.
+csDfToList <- function(cs_df){
+  grouped_df = dplyr::group_by(cs_df, cs_uid)
+  cs_list = setNames(dplyr::group_split(grouped_df), dplyr::group_keys(grouped_df)$cs_uid) %>%
+    purrr::map(~.$variant_id)
 }
