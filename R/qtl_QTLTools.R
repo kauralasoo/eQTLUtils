@@ -5,10 +5,11 @@
 #' @param data_list list of matrices
 #' @param output_dir relative path to the output dir
 #' @param file_suffix suffix added to each file after their name in the list.
+#' @param file_suffix suffix added to each file after their name in the list.
 #' @return None
 #' @author Kaur Alasoo
 #' @export
-saveQTLToolsMatrices <- function(data_list, output_dir, file_suffix = "bed", col_names = TRUE){
+saveQTLToolsMatrices <- function(data_list, output_dir, file_suffix = "bed", file_prefix = "", col_names = TRUE){
 
   #Check if the output dir exists and if not then create one
   if(!file.exists(output_dir)){
@@ -17,7 +18,8 @@ saveQTLToolsMatrices <- function(data_list, output_dir, file_suffix = "bed", col
 
   #Save each matrix as a separate  txt file
   for (sn in names(data_list)){
-    file_path = file.path(output_dir, paste(sn, file_suffix, sep = "."))
+    file_name = ifelse(file_prefix == "", paste(sn, file_suffix, sep = "."), paste(file_prefix, sn, file_suffix, sep = "."))
+    file_path = file.path(output_dir,file_name)
     print(file_path)
     write.table(data_list[[sn]], file_path, sep = "\t", quote = FALSE, row.names = FALSE, col.names = col_names)
   }
@@ -268,4 +270,37 @@ studySEtoQTLTools <- function(se, assay_name, out_dir, extra_qtl_group = NULL){
   #Extract sample names
   sample_names = purrr::map(qtltools_list, ~colnames(.)[-(1:6)])
   saveQTLToolsMatrices(sample_names, output_dir = out_dir, file_suffix = "sample_names.txt", col_names = FALSE)
+  
+  count_matrices <- purrr::map(group_se_list, ~SummarizedExperiment::cbind(phenotype_id = rownames(assays(.)[[assay_name]]), assays(.)[[assay_name]]))
+  saveQTLToolsMatrices(count_matrices, output_dir = output_dir, file_suffix = "tsv")
+}
+
+#' Split study SummarizedExperiment object into invidiual input files for QTLTools.
+#'
+#' Uses the qtl_group metadata column (required) to split a single SummarizedExperiment
+#' object into multiple independent input files for QTLTools. Write the files directly to disk.
+#'
+#' @param se SummarizedExperiment object.
+#' @param assay_name Name of the assay in the SummarizedExperiment object used for QTL mapping.
+#' @param out_dir Path to the output directory where the QTLTools input files will be written.
+#' @param study_name Custom study_name character string to safe files with prefix
+#'
+#' @return None
+#' @export
+studySEtoCountMatrices <- function(se, assay_name, out_dir, study_name = NULL){
+  #Make assertions
+  assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "qtl_group"))
+  assertthat::assert_that(assertthat::has_name(SummarizedExperiment::assays(se), assay_name))
+  
+  if (base::is.null(study_name)) {
+    study_name = unique(colData(se)["study"])[[1]]
+  }
+  
+  #Split the SE into list based on qtl_group
+  qtl_groups = unique(se$qtl_group)
+  group_list = setNames(as.list(qtl_groups), qtl_groups)
+  group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "qtl_group", .))
+    
+  count_matrices <- purrr::map(group_se_list, ~SummarizedExperiment::cbind(phenotype_id = rownames(assays(.)[[assay_name]]), assays(.)[[assay_name]]))
+  saveQTLToolsMatrices(count_matrices, output_dir = out_dir, file_suffix = "tsv", file_prefix = study_name)
 }

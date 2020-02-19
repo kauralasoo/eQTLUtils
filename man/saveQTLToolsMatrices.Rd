@@ -5,12 +5,14 @@
 \title{Save a list of matrices into a suitable format for QTLTools}
 \usage{
 saveQTLToolsMatrices(data_list, output_dir, file_suffix = "bed",
-  col_names = TRUE)
+  file_prefix = "", col_names = TRUE)
 }
 \arguments{
 \item{data_list}{list of matrices}
 
 \item{output_dir}{relative path to the output dir}
+
+\item{file_suffix}{suffix added to each file after their name in the list.}
 
 \item{file_suffix}{suffix added to each file after their name in the list.}
 }
