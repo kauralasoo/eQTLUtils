@@ -287,7 +287,7 @@ studySEtoQTLTools <- function(se, assay_name, out_dir, extra_qtl_group = NULL){
 #'
 #' @return None
 #' @export
-studySEtoCountMatrices <- function(se, assay_name, out_dir, study_name = NULL){
+studySEtoCountMatrices <- function(se, assay_name, out_dir, study_name = NULL, quantile_tpms = NULL, tpm_thres = 0.1){
   #Make assertions
   assertthat::assert_that(assertthat::has_name(SummarizedExperiment::colData(se), "qtl_group"))
   assertthat::assert_that(assertthat::has_name(SummarizedExperiment::assays(se), assay_name))
@@ -300,7 +300,33 @@ studySEtoCountMatrices <- function(se, assay_name, out_dir, study_name = NULL){
   qtl_groups = unique(se$qtl_group)
   group_list = setNames(as.list(qtl_groups), qtl_groups)
   group_se_list = purrr::map(group_list, ~subsetSEByColumnValue(se, "qtl_group", .))
-    
+  if (!is.null(quantile_tpms)) {
+    group_se_list <- purrr::map(group_se_list, ~filterTPMQuantile(., quantile_tpms = quantile_tpms, tpm_thres = tpm_thres))
+  }
   count_matrices <- purrr::map(group_se_list, ~SummarizedExperiment::cbind(phenotype_id = rownames(assays(.)[[assay_name]]), assays(.)[[assay_name]]))
-  saveQTLToolsMatrices(count_matrices, output_dir = out_dir, file_suffix = "tsv", file_prefix = study_name)
+  saveQTLToolsMatrices(count_matrices, output_dir = file.path(out_dir, "qtl_group_cqn_norm") , file_suffix = "tsv", file_prefix = study_name)
+}
+
+filterTPMQuantile <- function(subset_se, quantile_tpms, tpm_thres = 1){
+  #Check that required columns exist
+  assertthat::assert_that(assertthat::has_name(quantile_tpms, "qtl_group"))
+  assertthat::assert_that(assertthat::has_name(quantile_tpms, "median_tpm"))
+  assertthat::assert_that(assertthat::has_name(quantile_tpms, "phenotype_id"))
+  
+  #Find expressed genes
+  sample_meta_qtlgroup <- SummarizedExperiment::colData(subset_se) %>% SummarizedExperiment::as.data.frame()
+  phenotype_data <- SummarizedExperiment::rowData(subset_se) %>% SummarizedExperiment::as.data.frame()
+  assertthat::assert_that(assertthat::assert_that(sample_meta_qtlgroup$qtl_group %>% unique() %>% length()==1), 
+                          msg = "There are more than 1 qtl_groups in qtlgroup subset")
+  selected_qtl_group = sample_meta_qtlgroup$qtl_group %>% unique()
+  message("Filter SE by quntile TPMs for QTL group: ", selected_qtl_group)
+  
+  not_expressed_genes = dplyr::filter(quantile_tpms, qtl_group == selected_qtl_group, median_tpm < tpm_thres)
+  
+  #Find expressed phenotyes
+  expressed_phenotypes = setdiff(phenotype_data$gene_id, not_expressed_genes$phenotype_id)
+  message(paste0("Number of expressed genes included in the analysis: ", length(expressed_phenotypes)))
+  expressed_phenotype_metadata = dplyr::filter(phenotype_data, gene_id %in% expressed_phenotypes)
+  
+  return (subset_se[rowData(subset_se)$phenotype_id %in% expressed_phenotype_metadata$phenotype_id,])
 }
