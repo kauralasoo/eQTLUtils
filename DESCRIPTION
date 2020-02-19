@@ -3,21 +3,12 @@ Title: What the Package Does (one line, title case)
 Version: 0.0.0.9000
 Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
-Depends: R (>= 3.6.0)
-Imports: lumi (>= 2.36.0), 
-    limma (>= 3.40.0), 
-    dplyr,
-    readr,
-    tidyr,
-    SummarizedExperiment, 
-    cqn,
-    ggplot2,
-    plotly,
-    htmlwidgets,
-    assertthat,
-    GenomicRanges,
-    GDSArray
+Depends: R (>= 3.5.0)
+Imports: dplyr, readr, tidyr, assertthat, GenomicRanges
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+Suggests: lumi (>= 2.36.0), limma (>= 3.40.0), SummarizedExperiment, cqn, ggplot2,
+    plotly, htmlwidgets, GDSArray
+

@@ -200,6 +200,56 @@ array_normaliseSE <- function(se, norm_method = "quantile", assay_name = "exprs"
   return(processed_se)
 }
 
+array_normaliseSE2 <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE, filter_quality = TRUE){
+  valid_methods <- c("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant") # Quantile normalization, Robust spline normalization
+  
+  if (!(norm_method %in% valid_methods))
+    stop(paste0("Not a valid method. Please use value from the following list: ", paste0(valid_methods, collapse=", ")))
+  
+  #processed_se = se[, se$cell_type %in% c("monocyte", "neutrophil", "T-cell", "B-cell", "platelet")]
+  #processed_se = processed_se %>% array_filterSE_gene_types(valid_gene_types = "protein_coding")
+  
+  #if (filter_quality){
+  #  processed_se = processed_se[,processed_se$rna_qc_passed==TRUE & processed_se$genotype_qc_passed==TRUE]
+  #}
+  processed_se = se
+  # Extract fields
+  row_data = SummarizedExperiment::rowData(processed_se)
+  col_data = SummarizedExperiment::colData(processed_se)
+  assays = SummarizedExperiment::assays(processed_se)
+  
+  # Log 2 transform
+  expr_matrix = assays[[assay_name]]
+  if (log_transform){
+    expr_matrix = expr_matrix %>% log2_transform() 
+  }
+  
+  # Quantile normalize
+  # Perform normalisation
+  expr_matrix = as.matrix(expr_matrix)
+  expr_norm = lumi::lumiN(expr_matrix, method = norm_method)
+  
+  # Update assays
+  SummarizedExperiment::assays(processed_se)[["norm_exprs"]] = data.frame(expr_norm)
+  processed_se = SummarizedExperiment::SummarizedExperiment(
+    assays = assays(processed_se),
+    colData = colData(processed_se),
+    rowData = rowData(processed_se))
+  
+  # Batch adjustment
+  if(adjust_batch & length(table(col_data$batch)) > 1){
+    adj_se = array_RemoveBatch2(processed_se, assay_name="norm_exprs")
+    assays = SummarizedExperiment::assays(adj_se) # adds batch_exprs value
+  }
+  
+  # Make an update se object
+  processed_se = SummarizedExperiment::SummarizedExperiment(
+    assays = assays,
+    colData = col_data,
+    rowData = row_data)
+  return(processed_se)
+}
+
 #' Generate Sex dependent QC Plot.
 #'
 #' @param study_data SummarizedExperiment file to be analysed
@@ -382,6 +432,43 @@ array_RemoveBatch <- function(se, assay_name="exprs"){
   condition_timepoint = paste(sample_metadata$condition, sample_metadata$timepoint)
   nr_of_conditions = table(condition_timepoint)
 
+  if(dim(nr_of_cell_types) > 1 & dim(nr_of_conditions) > 1){
+    design = model.matrix(~sample_metadata$cell_type + condition_timepoint)
+  }
+  else if(dim(nr_of_cell_types) > 1){
+      design = model.matrix(~sample_metadata$cell_type)
+    }
+  else if(dim(nr_of_conditions) > 1){
+    design = model.matrix(~condition_timepoint)
+  }
+  else{
+    design = matrix(1, ncol(mat), 1)
+  }
+  mat_wobatch = limma::removeBatchEffect(mat, batch = batches, design = design)
+  SummarizedExperiment::assays(processed_se)[["batch_exprs"]] = data.frame(mat_wobatch)
+  processed_se = SummarizedExperiment::SummarizedExperiment(
+    assays = assays(processed_se),
+    colData = colData(processed_se),
+    rowData = rowData(processed_se))
+  return(processed_se)
+}
+
+array_RemoveBatch2 <- function(se, assay_name="norm_exprs"){
+  #processed_se = se[,se$rna_qc_passed==TRUE & se$genotype_qc_passed==TRUE & se$cell_type %in% c("monocyte", "neutrophil", "T-cell", "B-cell", "platelet") ]
+  #processed_se = processed_se %>% array_filterSE_gene_types(valid_gene_types="protein_coding")
+  processed_se = se
+  batches = factor(colData(processed_se)$batch)
+  
+  mat = as.matrix(assays(processed_se)[[assay_name]])
+  # removeBatchEffect assumes log transformed data
+  #mat = log2_transform(mat)
+  
+  sample_metadata = SummarizedExperiment::colData(processed_se)
+  nr_of_cell_types = table(sample_metadata$cell_type)
+  # merge condition and timepoint
+  condition_timepoint = paste(sample_metadata$condition, sample_metadata$timepoint)
+  nr_of_conditions = table(condition_timepoint)
+  
   if(dim(nr_of_cell_types) > 1 & dim(nr_of_conditions) > 1){
     design = model.matrix(~sample_metadata$cell_type + condition_timepoint)
   }
