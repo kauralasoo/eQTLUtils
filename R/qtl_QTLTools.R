@@ -304,7 +304,7 @@ studySEtoCountMatrices <- function(se, assay_name, out_dir, study_name = NULL, q
     group_se_list <- purrr::map(group_se_list, ~filterTPMQuantile(., quantile_tpms = quantile_tpms, tpm_thres = tpm_thres))
   }
   count_matrices <- purrr::map(group_se_list, ~SummarizedExperiment::cbind(phenotype_id = rownames(assays(.)[[assay_name]]), assays(.)[[assay_name]]))
-  saveQTLToolsMatrices(count_matrices, output_dir = file.path(out_dir, "qtl_group_cqn_norm") , file_suffix = "tsv", file_prefix = study_name)
+  saveQTLToolsMatrices(count_matrices, output_dir = file.path(out_dir, "qtl_group_split_norm") , file_suffix = "tsv", file_prefix = study_name)
 }
 
 filterTPMQuantile <- function(subset_se, quantile_tpms, tpm_thres = 1){
