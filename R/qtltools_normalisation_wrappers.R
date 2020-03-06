@@ -45,7 +45,7 @@ qtltoolsPrepareSE <- function(se, quant_method, filter_rna_qc = TRUE, filter_gen
 
       #Normalize and regress out batch effects
       message(" ## Normalizing and regressing out the batch effects")
-      se_norm = eQTLUtils::array_normaliseSE(se_filtered, norm_method = "quantile", assay_name = "exprs",
+      se_norm = eQTLUtils::array_normaliseSE2(se_filtered, norm_method = "quantile", assay_name = "exprs",
                                            log_transform = TRUE, adjust_batch = TRUE)
 
     } else if(quant_method == "leafcutter"){
