@@ -149,100 +149,48 @@ log2_transform <- function(mat){
 #' @param assay_name Assay name to be normalised (exprs or batch_exprs)
 #' @param log_transform Boolean value if intensities should be log2 transformed (Default:TRUE)
 #' @param adjust_batch Boolean value if data should be adjusted for batch effects before normalisation (Default:FALSE)
-#' @param filter_quality Boolean value if should exclude samples with RNA_QC_passed=FALSE (Default:TRUE)
 #' @return SummarizedExperiment with assay 'norm_exprs'
 #' @author Liis Kolberg
 #' @importFrom dplyr "%>%"
 #' @export
 #'
-array_normaliseSE <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE){
+array_normaliseSE2 <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE){
   valid_methods <- c("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant") # Quantile normalization, Robust spline normalization
 
   if (!(norm_method %in% valid_methods))
     stop(paste0("Not a valid method. Please use value from the following list: ", paste0(valid_methods, collapse=", ")))
 
   processed_se = se
-
   # Extract fields
   row_data = SummarizedExperiment::rowData(processed_se)
   col_data = SummarizedExperiment::colData(processed_se)
   assays = SummarizedExperiment::assays(processed_se)
 
-  # Batch adjustment
-  if(adjust_batch & length(table(col_data$batch)) > 1){
-    message("Perform batch adjustment ...")
-
-    #Check that required columns are present in the metadata
-    assertthat::assert_that(assertthat::has_name(col_data, "batch"))
-
-    adj_se = array_RemoveBatch(processed_se, assay_name=assay_name)
-    assays = SummarizedExperiment::assays(adj_se)
-    expr_matrix = assays[["batch_exprs"]]
-  }
-  else{
-    expr_matrix = assays[[assay_name]]
-    if(log_transform){
-      expr_matrix = expr_matrix %>% log2_transform()
-    }
-  }
-  # Perform normalisation
-  expr_matrix = as.matrix(expr_matrix)
-  expr_norm = lumi::lumiN(expr_matrix, method = norm_method)
-
-  # Update assays
-  assays[["norm_exprs"]] = expr_norm
-
-  # Make an update se object
-  processed_se = SummarizedExperiment::SummarizedExperiment(
-    assays = assays,
-    colData = col_data,
-    rowData = row_data)
-  return(processed_se)
-}
-
-array_normaliseSE2 <- function(se, norm_method = "quantile", assay_name = "exprs", log_transform = TRUE, adjust_batch = FALSE, filter_quality = TRUE){
-  valid_methods <- c("quantile", "rsn", "ssn", "loess", "vsn", "rankinvariant") # Quantile normalization, Robust spline normalization
-  
-  if (!(norm_method %in% valid_methods))
-    stop(paste0("Not a valid method. Please use value from the following list: ", paste0(valid_methods, collapse=", ")))
-  
-  #processed_se = se[, se$cell_type %in% c("monocyte", "neutrophil", "T-cell", "B-cell", "platelet")]
-  #processed_se = processed_se %>% array_filterSE_gene_types(valid_gene_types = "protein_coding")
-  
-  #if (filter_quality){
-  #  processed_se = processed_se[,processed_se$rna_qc_passed==TRUE & processed_se$genotype_qc_passed==TRUE]
-  #}
-  processed_se = se
-  # Extract fields
-  row_data = SummarizedExperiment::rowData(processed_se)
-  col_data = SummarizedExperiment::colData(processed_se)
-  assays = SummarizedExperiment::assays(processed_se)
-  
   # Log 2 transform
   expr_matrix = assays[[assay_name]]
   if (log_transform){
-    expr_matrix = expr_matrix %>% log2_transform() 
+    expr_matrix = expr_matrix %>% log2_transform()
   }
-  
+
   # Quantile normalize
   # Perform normalisation
   expr_matrix = as.matrix(expr_matrix)
   expr_norm = lumi::lumiN(expr_matrix, method = norm_method)
-  
+
   # Update assays
   SummarizedExperiment::assays(processed_se)[["norm_exprs"]] = data.frame(expr_norm)
   processed_se = SummarizedExperiment::SummarizedExperiment(
     assays = assays(processed_se),
     colData = colData(processed_se),
     rowData = rowData(processed_se))
-  
+
   # Batch adjustment
   if(adjust_batch & length(table(col_data$batch)) > 1){
     adj_se = array_RemoveBatch2(processed_se, assay_name="norm_exprs")
     assays = SummarizedExperiment::assays(adj_se) # adds batch_exprs value
   }
-  
-  # Make an update se object
+
+  # Make an updated se object
   processed_se = SummarizedExperiment::SummarizedExperiment(
     assays = assays,
     colData = col_data,
@@ -297,12 +245,12 @@ array_CalculateSexQCDataFrame <- function(study_data, assay_name, filterByCondit
   } else {
     study_data_filt <-study_data
   }
-  
+
   if (normalise_array) {
     study_data_filt <- eQTLUtils::array_normaliseSE(study_data_filt)
     assay_name = "norm_exprs"
-  } 
-  
+  }
+
   # get the Y chromosome genes only from rowdata
   study_Y_chrom_data <- dplyr::filter(study_rowdata, chromosome=="Y", gene_type=="protein_coding") %>% dplyr::arrange(gene_start)
 
@@ -416,59 +364,20 @@ array_PlotMDS <- function(se, assay_name="exprs", condition = NULL, filter_quali
 #' @author Liis Kolberg
 #' @export
 #'
-
-array_RemoveBatch <- function(se, assay_name="exprs"){
-  #processed_se = se[,se$RNA_QC_passed==TRUE & se$cell_type %in% c("monocytes", "neutrophils", "T-cell", "B-cell", "platelet") ]
-  processed_se = se
-  batches = factor(colData(processed_se)$batch)
-
-  mat = as.matrix(assays(processed_se)[[assay_name]])
-  # removeBatchEffect assumes log transformed data
-  mat = log2_transform(mat)
-
-  sample_metadata = SummarizedExperiment::colData(processed_se)
-  nr_of_cell_types = table(sample_metadata$cell_type)
-  # merge condition and timepoint
-  condition_timepoint = paste(sample_metadata$condition, sample_metadata$timepoint)
-  nr_of_conditions = table(condition_timepoint)
-
-  if(dim(nr_of_cell_types) > 1 & dim(nr_of_conditions) > 1){
-    design = model.matrix(~sample_metadata$cell_type + condition_timepoint)
-  }
-  else if(dim(nr_of_cell_types) > 1){
-      design = model.matrix(~sample_metadata$cell_type)
-    }
-  else if(dim(nr_of_conditions) > 1){
-    design = model.matrix(~condition_timepoint)
-  }
-  else{
-    design = matrix(1, ncol(mat), 1)
-  }
-  mat_wobatch = limma::removeBatchEffect(mat, batch = batches, design = design)
-  SummarizedExperiment::assays(processed_se)[["batch_exprs"]] = data.frame(mat_wobatch)
-  processed_se = SummarizedExperiment::SummarizedExperiment(
-    assays = assays(processed_se),
-    colData = colData(processed_se),
-    rowData = rowData(processed_se))
-  return(processed_se)
-}
-
 array_RemoveBatch2 <- function(se, assay_name="norm_exprs"){
-  #processed_se = se[,se$rna_qc_passed==TRUE & se$genotype_qc_passed==TRUE & se$cell_type %in% c("monocyte", "neutrophil", "T-cell", "B-cell", "platelet") ]
-  #processed_se = processed_se %>% array_filterSE_gene_types(valid_gene_types="protein_coding")
+
   processed_se = se
+
+  #Extract batches and matrix
   batches = factor(colData(processed_se)$batch)
-  
   mat = as.matrix(assays(processed_se)[[assay_name]])
-  # removeBatchEffect assumes log transformed data
-  #mat = log2_transform(mat)
-  
+
   sample_metadata = SummarizedExperiment::colData(processed_se)
   nr_of_cell_types = table(sample_metadata$cell_type)
   # merge condition and timepoint
   condition_timepoint = paste(sample_metadata$condition, sample_metadata$timepoint)
   nr_of_conditions = table(condition_timepoint)
-  
+
   if(dim(nr_of_cell_types) > 1 & dim(nr_of_conditions) > 1){
     design = model.matrix(~sample_metadata$cell_type + condition_timepoint)
   }
