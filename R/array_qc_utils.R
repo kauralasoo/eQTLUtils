@@ -179,15 +179,15 @@ array_normaliseSE2 <- function(se, norm_method = "quantile", assay_name = "exprs
 
   # Update assays
   SummarizedExperiment::assays(processed_se)[["norm_exprs"]] = data.frame(expr_norm)
-  processed_se = SummarizedExperiment::SummarizedExperiment(
-    assays = assays(processed_se),
-    colData = colData(processed_se),
-    rowData = rowData(processed_se))
+  assays = SummarizedExperiment::assays(processed_se)
 
   # Batch adjustment
   if(adjust_batch & length(table(col_data$batch)) > 1){
+    message("### Performing batch adjustment")
     adj_se = array_RemoveBatch2(processed_se, assay_name="norm_exprs")
-    assays = SummarizedExperiment::assays(adj_se) # adds batch_exprs value
+
+    #Replace norm_exprs assay with batch_exprs assay
+    assays[["norm_exprs"]] = SummarizedExperiment::assays(adj_se)[["batch_exprs"]]
   }
 
   # Make an updated se object
