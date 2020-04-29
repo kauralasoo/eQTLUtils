@@ -247,7 +247,7 @@ array_CalculateSexQCDataFrame <- function(study_data, assay_name, filterByCondit
   }
 
   if (normalise_array) {
-    study_data_filt <- eQTLUtils::array_normaliseSE(study_data_filt)
+    study_data_filt <- eQTLUtils::array_normaliseSE2(study_data_filt)
     assay_name = "norm_exprs"
   }
 
