@@ -46,6 +46,24 @@ importQTLtoolsTable <- function(file_path){
   return(table)
 }
 
+#' Import QTLtools output table from permutation run v2 into R.
+#'
+#'
+#' @param file_path Path to the QTLtools permutation output file.
+#' @return data_frame containing gene_ids, snp ids and p-values.
+#' @author Nurlan Kerimov
+#' @export
+importQTLtoolsPermRes<- function(file_path){
+  col_types = "cciiciddddd"
+  table = readr::read_tsv(file_path, col_types = col_types) %>%
+    dplyr::filter(!is.na(p_beta)) %>%
+    dplyr::mutate(p_bonferroni = pvalue*n_variants*n_traits) %>%
+    dplyr::mutate(p_bonferroni = pmin(p_bonferroni,1)) %>%
+    dplyr::mutate(p_fdr = p.adjust(p_beta, method = "fdr")) %>%
+    dplyr::arrange(p_fdr)
+  return(table)
+}
+
 importQTLtoolsNominalTable <- function(file_path){
   col_names = c("phenotype_id", "pheno_chr", "pheno_start", "pheno_end", "strand", "n_cis_snps", "distance", "snp_id", "snp_chr", "snp_start", "snp_end", "p_nominal", "beta", "is_lead")
   col_types = "cciiciicciiddi"
