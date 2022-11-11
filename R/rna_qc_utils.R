@@ -307,7 +307,7 @@ calculateMDSMatrix <- function(study_data_se, condition = "all"){
     study_data_se = study_data_se[,study_data_se$condition %in% condition]
   }
 
-  valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
+  valid_gene_types = c("lincRNA","lncRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
                        "IG_V_gene", "TR_C_gene","TR_D_gene","TR_J_gene", "TR_V_gene",
                        "3prime_overlapping_ncrna","known_ncrna", "processed_transcript",
                        "antisense","sense_intronic","sense_overlapping")
@@ -445,7 +445,7 @@ calculatePCAMatrix <- function(study_data_se, condition = "all", return_pca_obje
     study_data_se = study_data_se[,study_data_se$condition %in% condition]
   }
 
-  valid_gene_types = c("lincRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
+  valid_gene_types = c("lincRNA","lncRNA","protein_coding","IG_C_gene","IG_D_gene","IG_J_gene",
                        "IG_V_gene", "TR_C_gene","TR_D_gene","TR_J_gene", "TR_V_gene",
                        "3prime_overlapping_ncrna","known_ncrna", "processed_transcript",
                        "antisense","sense_intronic","sense_overlapping")
