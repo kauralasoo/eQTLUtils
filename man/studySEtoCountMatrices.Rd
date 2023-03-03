@@ -4,8 +4,14 @@
 \alias{studySEtoCountMatrices}
 \title{Split study SummarizedExperiment object into invidiual input files for QTLTools.}
 \usage{
-studySEtoCountMatrices(se, assay_name, out_dir, study_name = NULL,
-  quantile_tpms = NULL, tpm_thres = 0.1)
+studySEtoCountMatrices(
+  se,
+  assay_name,
+  out_dir,
+  study_name = NULL,
+  quantile_tpms = NULL,
+  tpm_thres = 0.1
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object.}

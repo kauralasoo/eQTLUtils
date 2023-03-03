@@ -4,9 +4,13 @@
 \alias{filterSummarizedExperiment}
 \title{Filter a Summarized Experiment according to provided parameters}
 \usage{
-filterSummarizedExperiment(se, valid_chromosomes = NA,
-  valid_gene_types = NA, filter_rna_qc = FALSE,
-  filter_genotype_qc = FALSE)
+filterSummarizedExperiment(
+  se,
+  valid_chromosomes = NA,
+  valid_gene_types = NA,
+  filter_rna_qc = FALSE,
+  filter_genotype_qc = FALSE
+)
 }
 \arguments{
 \item{se}{Summarized Experiment object to be filteres}

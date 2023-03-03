@@ -4,8 +4,12 @@
 \alias{plotPCAFromMatrix}
 \title{Generate PCA QC Plot from PCA Matrix}
 \usage{
-plotPCAFromMatrix(pca_matrix, export_output = FALSE,
-  html_output = FALSE, output_dir = "./")
+plotPCAFromMatrix(
+  pca_matrix,
+  export_output = FALSE,
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{pca_matrix}{PCA matrix}

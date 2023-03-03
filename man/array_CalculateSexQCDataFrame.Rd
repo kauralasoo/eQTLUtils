@@ -4,8 +4,12 @@
 \alias{array_CalculateSexQCDataFrame}
 \title{Generate Sex dependent QC DataFrame.}
 \usage{
-array_CalculateSexQCDataFrame(study_data, assay_name,
-  filterByCondition = TRUE, normalise_array = FALSE)
+array_CalculateSexQCDataFrame(
+  study_data,
+  assay_name,
+  filterByCondition = TRUE,
+  normalise_array = FALSE
+)
 }
 \arguments{
 \item{study_data}{SummarizedExperiment file to be analysed}

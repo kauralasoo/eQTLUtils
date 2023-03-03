@@ -4,15 +4,15 @@
 \alias{checkCisVariants}
 \title{Remove phenotypes from SummarizedExperiments that do not have cis genotypes}
 \usage{
-checkCisVariants(se, variant_information, cis_distance = 1e+06,
-  min_cis_variant = 5)
+checkCisVariants(
+  se,
+  variant_information,
+  cis_distance = 1e+06,
+  min_cis_variant = 5
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
-
-\item{variant_information}{Variant information data frame from importVariantInformation()}
-
-\item{variant_information}{Maximal distance from phenotype_pos}
 
 \item{variant_information}{Minimal number of variants in cis before the phenotype is removed.}
 }

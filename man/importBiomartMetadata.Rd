@@ -4,8 +4,10 @@
 \alias{importBiomartMetadata}
 \title{Import transcript metadata from biomart web export}
 \usage{
-importBiomartMetadata(biomart_path,
-  col_types = "ccccccciciiciiiiccccccccidccccii")
+importBiomartMetadata(
+  biomart_path,
+  col_types = "ccccccciciiciiiiccccccccidccccii"
+)
 }
 \arguments{
 \item{biomart_path}{Path to the biomart download text file}

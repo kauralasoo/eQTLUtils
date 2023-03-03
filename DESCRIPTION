@@ -8,6 +8,6 @@ Imports: dplyr, readr, tidyr, assertthat, GenomicRanges
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Suggests: lumi (>= 2.36.0), limma (>= 3.40.0), SummarizedExperiment, cqn, ggplot2,
     plotly, htmlwidgets, GDSArray

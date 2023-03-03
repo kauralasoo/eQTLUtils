@@ -4,9 +4,14 @@
 \alias{makeSummarizedExperimentFromCountMatrix}
 \title{Make Summarized Experiment object from raw or normalised count matrix}
 \usage{
-makeSummarizedExperimentFromCountMatrix(assay, row_data, col_data,
-  assay_name = "counts", quant_method = "gene_counts",
-  reformat = TRUE)
+makeSummarizedExperimentFromCountMatrix(
+  assay,
+  row_data,
+  col_data,
+  assay_name = "counts",
+  quant_method = "gene_counts",
+  reformat = TRUE
+)
 }
 \arguments{
 \item{assay}{count matrix of any phenotype quantification.}

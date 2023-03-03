@@ -4,8 +4,7 @@
 \alias{assign_populations}
 \title{Assigns populations using distance matrix from generate_distance_matrix() function}
 \usage{
-assign_populations(distance_matrix, abs_threshold = 0.02,
-  rel_threshold = 1.7)
+assign_populations(distance_matrix, abs_threshold = 0.02, rel_threshold = 1.7)
 }
 \arguments{
 \item{distance_matrix}{distance matrix dataframe created by generate_distance_matrix() function}

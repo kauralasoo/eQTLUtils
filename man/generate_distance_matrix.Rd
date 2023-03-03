@@ -4,8 +4,12 @@
 \alias{generate_distance_matrix}
 \title{Generate distance matrix of genotype samples using PC matrices}
 \usage{
-generate_distance_matrix(reference_pca_df, pca_df, n_pcs = 3,
-  method = "euclidean")
+generate_distance_matrix(
+  reference_pca_df,
+  pca_df,
+  n_pcs = 3,
+  method = "euclidean"
+)
 }
 \arguments{
 \item{reference_pca_df}{PC matrix of reference genotype data. Should have genotype_id, superpopulation_code and PCN columns}

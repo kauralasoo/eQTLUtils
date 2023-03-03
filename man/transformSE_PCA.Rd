@@ -4,9 +4,15 @@
 \alias{transformSE_PCA}
 \title{Quantile normalise SummarizedExperiment by rows}
 \usage{
-transformSE_PCA(se, assay_name = "cqn", n_pcs = NULL,
-  log_transform = FALSE, column_prefix = "",
-  feature_id = "sample_id", ...)
+transformSE_PCA(
+  se,
+  assay_name = "cqn",
+  n_pcs = NULL,
+  log_transform = FALSE,
+  column_prefix = "",
+  feature_id = "sample_id",
+  ...
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}

@@ -65,10 +65,22 @@ quantileNormaliseMatrix <- function(matrix){
   return(quantile_matrix)
 }
 
+#' Perform inverse normal transformation on the columns of a matrix
+#'
+#' @param x matrix
+#'
+#' @return matrix
+#' @export
 quantileNormaliseCols <- function(matrix,...){
   quantileNormaliseMatrix(matrix, ...)
 }
 
+#' Perform inverse normal transformation on the rows of a matrix
+#'
+#' @param x matrix
+#'
+#' @return matrix
+#' @export
 quantileNormaliseRows <- function(matrix,...){
   t(quantileNormaliseMatrix(t(matrix), ...))
 }

@@ -4,8 +4,14 @@
 \alias{array_Boxplot}
 \title{Generate Boxplot QC Plot for n random samples}
 \usage{
-array_Boxplot(se, n = 10, assay_name = "exprs",
-  filter_quality = TRUE, pdf_output = FALSE, output_dir = "./")
+array_Boxplot(
+  se,
+  n = 10,
+  assay_name = "exprs",
+  filter_quality = TRUE,
+  pdf_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment file to be analysed}

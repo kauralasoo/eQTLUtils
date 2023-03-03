@@ -4,8 +4,14 @@
 \alias{array_plotPCA}
 \title{Generate PCA QC Plot}
 \usage{
-array_plotPCA(se, assay_name = "exprs", filter_quality = TRUE,
-  show_quality = FALSE, html_output = FALSE, output_dir = "./")
+array_plotPCA(
+  se,
+  assay_name = "exprs",
+  filter_quality = TRUE,
+  show_quality = FALSE,
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment file to be analysed}

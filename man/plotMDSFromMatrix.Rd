@@ -4,8 +4,12 @@
 \alias{plotMDSFromMatrix}
 \title{Generate MDS QC Plot from PCA Matrix}
 \usage{
-plotMDSFromMatrix(mds_matrix, export_output = FALSE,
-  html_output = FALSE, output_dir = "./")
+plotMDSFromMatrix(
+  mds_matrix,
+  export_output = FALSE,
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{mds_matrix}{MDS matrix}

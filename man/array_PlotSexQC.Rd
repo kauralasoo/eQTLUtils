@@ -4,8 +4,12 @@
 \alias{array_PlotSexQC}
 \title{Generate Sex dependent QC Plot.}
 \usage{
-array_PlotSexQC(study_data, assay_name = "exprs", html_output = FALSE,
-  output_dir = "./")
+array_PlotSexQC(
+  study_data,
+  assay_name = "exprs",
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{study_data}{SummarizedExperiment file to be analysed}

@@ -4,8 +4,11 @@
 \alias{leafcutterAnnotateIntrons}
 \title{Annotate leafcutter introns with gene metadata}
 \usage{
-leafcutterAnnotateIntrons(leafcutter_ids, intron_annotation_path,
-  transcript_meta)
+leafcutterAnnotateIntrons(
+  leafcutter_ids,
+  intron_annotation_path,
+  transcript_meta
+)
 }
 \arguments{
 \item{leafcutter_ids}{vector of leafcutter intron ids}

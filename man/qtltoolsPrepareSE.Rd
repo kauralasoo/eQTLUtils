@@ -4,8 +4,13 @@
 \alias{qtltoolsPrepareSE}
 \title{Normalise phenotype SummarisedExperiment object for QTL mapping with QTLtools}
 \usage{
-qtltoolsPrepareSE(se, quant_method, filter_rna_qc = TRUE,
-  filter_genotype_qc = TRUE, keep_XY = FALSE)
+qtltoolsPrepareSE(
+  se,
+  quant_method,
+  filter_rna_qc = TRUE,
+  filter_genotype_qc = TRUE,
+  keep_XY = FALSE
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object used for QTL mapping}

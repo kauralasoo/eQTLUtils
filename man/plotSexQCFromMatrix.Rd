@@ -4,8 +4,13 @@
 \alias{plotSexQCFromMatrix}
 \title{Generate Sex dependent QC Plot.}
 \usage{
-plotSexQCFromMatrix(sex_qc_matrix, study_name, export_output = FALSE,
-  html_output = FALSE, output_dir = "./")
+plotSexQCFromMatrix(
+  sex_qc_matrix,
+  study_name,
+  export_output = FALSE,
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{html_output}{Boolean value if html output should be created (Default:FALSE)}

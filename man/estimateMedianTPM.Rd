@@ -4,8 +4,12 @@
 \alias{estimateMedianTPM}
 \title{Estimate median TPM for each gene in each sample group of a SummarizedExperiment object.}
 \usage{
-estimateMedianTPM(se, subset_by = "qtl_group", assay_name = "counts",
-  prob = 0.5)
+estimateMedianTPM(
+  se,
+  subset_by = "qtl_group",
+  assay_name = "counts",
+  prob = 0.5
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}

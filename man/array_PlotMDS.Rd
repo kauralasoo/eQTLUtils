@@ -4,8 +4,14 @@
 \alias{array_PlotMDS}
 \title{Generate MDS QC Plot}
 \usage{
-array_PlotMDS(se, assay_name = "exprs", condition = NULL,
-  filter_quality = TRUE, html_output = FALSE, output_dir = "./")
+array_PlotMDS(
+  se,
+  assay_name = "exprs",
+  condition = NULL,
+  filter_quality = TRUE,
+  html_output = FALSE,
+  output_dir = "./"
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment file to be analysed}
